@@ -20,7 +20,7 @@ function AnnotationInput() {
         data={[
           "Area of Interest",
           "Suggested Sensor Location",
-          "Comment on Existing Sensors",
+          "Comment on existing sensor location",
         ]}
         mt="md"
       />

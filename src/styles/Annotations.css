@@ -1,3 +1,15 @@
 .annotation_paper:active {
   filter: brightness(0.7);
 }
+
+.aoi {
+  color: blue;
+}
+
+.ssl {
+  color: green;
+}
+
+.coesl {
+  color: goldenrod;
+}
