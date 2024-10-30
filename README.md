@@ -1,8 +1,10 @@
-# React + Vite
+# Buzzards Bay Spatial Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A tool used to collect spatial annotations in interviews.
 
-Currently, two official plugins are available:
+## Installation
+1. `npm i`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to run
+1. `npm run dev`
+2. It will tell you it is running on `localhost:5173`
