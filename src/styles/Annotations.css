@@ -2,14 +2,14 @@
   filter: brightness(0.7);
 }
 
-.aoi {
+.interest {
   color: blue;
 }
 
-.ssl {
+.suggestion {
   color: green;
 }
 
-.coesl {
+.comment {
   color: goldenrod;
 }

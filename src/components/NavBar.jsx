@@ -3,11 +3,11 @@ import Annotations from "./Annotations.jsx";
 import AnnotationInput from "./AnnotationInput.jsx";
 import { Button, Divider, Stack } from "@mantine/core";
 
-function NavBar() {
+function NavBar({ code }) {
   return (
     <div style={{ flexGrow: 1, overflow: "auto" }}>
       <Stack gap="md">
-        <UserInformation />
+        <UserInformation code={code} />
         <Divider />
         <Annotations />
         <Divider />

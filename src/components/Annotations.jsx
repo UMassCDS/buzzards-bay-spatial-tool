@@ -13,35 +13,28 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { useContext } from "react";
+import { AnnotationsContext } from "../context/AnnotationsContext";
 
 import "../styles/Annotations.css";
 
 const cssMap = {
-  "Area of Interest": "aoi",
-  "Suggested Sensor Location": "ssl",
-  "Comment on existing sensor location": "coesl",
+  "Area of Interest": "interest",
+  "Suggested Sensor Location": "suggestion",
+  "Comment on existing sensor location": "comment",
 };
 
 function Annotations() {
   const [opened, { toggle }] = useDisclosure(false);
-  // const [opened, setOpened] = useState(false);
-  const [items, setItems] = useState([
-    { id: 1, type: "Area of Interest", notes: "I got fish" },
-    { id: 2, type: "Suggested Sensor Location", notes: "Something" },
-    {
-      id: 3,
-      type: "Comment on existing sensor location",
-      notes: "Another note",
-    },
-  ]);
+  const context = useContext(AnnotationsContext);
 
   const handleCardClick = (item) => {
     console.log(item);
   };
 
-  const handleDelete = (itemId, event) => {
+  const handleDelete = (index, event) => {
     event.stopPropagation(); // Prevent the card click event from firing
-    setItems(items.filter((item) => item.id !== itemId));
+    context.deleteFromPriorAnnotations(index);
   };
 
   return (
@@ -54,10 +47,10 @@ function Annotations() {
 
       <Collapse in={opened} p="sm">
         <Stack gap="sm">
-          {items.map((item, index) => (
+          {context.priorAnnotations.map((item, index) => (
             <Paper
               className="annotation_paper"
-              key={item.id}
+              key={index}
               withBorder
               style={{
                 cursor: "pointer",
@@ -81,7 +74,7 @@ function Annotations() {
                 </div>
                 <ActionIcon
                   color="red"
-                  onClick={(event) => handleDelete(item.id, event)}
+                  onClick={(event) => handleDelete(index, event)}
                 >
                   <FaRegTrashAlt size={16} />
                 </ActionIcon>
