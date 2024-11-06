@@ -9,6 +9,7 @@ import {
   Collapse,
   Paper,
   Stack,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
@@ -42,9 +43,11 @@ function Annotations() {
   return (
     <Box>
       <Group justify="center">
-        <Button onClick={toggle} variant="outline" color="yellow">
-          Prior Annotations
-        </Button>
+        <Tooltip label="List your annotations from this interview session.">
+          <Button onClick={toggle} variant="outline" color="yellow">
+            Prior Annotations
+          </Button>
+        </Tooltip>
       </Group>
 
       <Collapse in={opened} p="sm">

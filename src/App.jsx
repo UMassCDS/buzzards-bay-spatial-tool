@@ -25,10 +25,16 @@ import { AnnotationsContextProvider } from "./context/AnnotationsContext";
 function App() {
   const [navBarOpened, { toggle }] = useDisclosure();
   const [modalOpened, { open, close }] = useDisclosure(true);
+  const validationFunction = (value) => {
+    if (value === "") {
+      return false;
+    } else {
+      return true;
+    }
+  };
   const userCodeField = useField({
     initialValue: "",
-    validateOnBlur: true,
-    validate: (value) => (value === "" ? "Code not valid" : null),
+    validate: (value) => (validationFunction(value) ? "Code not valid" : null),
   });
 
   return (
@@ -49,16 +55,22 @@ function App() {
             title="Login"
             closeOnClickOutside={false}
             closeOnEscape={false}
+            withCloseButton={false}
             trapFocus
           >
             <TextInput
               {...userCodeField.getInputProps()}
               required={true}
               label="User code"
-              description="Unique identifier for the interviewee"
+              description="Unique identifier for the interviewee, you must enter code to proceed"
               mb="md"
             />
-            <Button onClick={close}>Log in</Button>
+            <Button
+              disabled={!validationFunction(userCodeField.getValue())}
+              onClick={close}
+            >
+              Log in
+            </Button>
           </Modal>
           <AppShell.Header>
             <Group h="100%" px="sm">
