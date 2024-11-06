@@ -30,11 +30,13 @@ function Annotations() {
 
   const handleCardClick = (item) => {
     console.log(item);
+    item.modifiedAt = new Date();
+    context.setCurrentAnnotation(item);
   };
 
-  const handleDelete = (index, event) => {
+  const handleDelete = (item, event) => {
     event.stopPropagation(); // Prevent the card click event from firing
-    context.deleteFromPriorAnnotations(index);
+    context.deleteFromPriorAnnotations(item);
   };
 
   return (
@@ -74,7 +76,7 @@ function Annotations() {
                 </div>
                 <ActionIcon
                   color="red"
-                  onClick={(event) => handleDelete(index, event)}
+                  onClick={(event) => handleDelete(item, event)}
                 >
                   <FaRegTrashAlt size={16} />
                 </ActionIcon>

@@ -11,30 +11,57 @@ import {
   Flex,
 } from "@mantine/core";
 import { AnnotationsContext } from "../context/AnnotationsContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 
 function AnnotationInput() {
   const context = useContext(AnnotationsContext);
   const form = useForm({
     mode: "controlled",
     initialValues: {
-      type: "Area of Interest",
-      notes: "",
+      type: context.currentAnnotation.type,
+      notes: context.currentAnnotation.notes,
     },
     validate: {
       notes: (value) => (value === "" ? "Please enter notes" : null),
     },
+    // onValuesChange: (values) => {
+    //   const updatedCurrentAnnotation = { ...context.currentAnnotation };
+    //   updatedCurrentAnnotation.type = values.type;
+    //   updatedCurrentAnnotation.notes = values.notes;
+
+    //   context.setCurrentAnnotation(updatedCurrentAnnotation);
+    // },
   });
 
-  const handleSubmit = (formValues) => {
-    const annotationValues = {
-      ...formValues,
-      annotationHexes: [],
-    };
+  useEffect(() => {
+    const { type, notes } = context.currentAnnotation;
 
-    console.log(annotationValues);
-    context.addToPriorAnnotations(annotationValues);
-    form.setFieldValue("notes", "");
+    if (form.values.type !== type || form.values.notes !== notes) {
+      form.setValues({
+        type: type,
+        notes: notes,
+      });
+    }
+  }, [context.currentAnnotation]);
+
+  const handleSubmit = (formValues) => {
+    const updatedCurrentAnnotation = { ...context.currentAnnotation };
+    updatedCurrentAnnotation.type = formValues.type;
+    updatedCurrentAnnotation.notes = formValues.notes;
+
+    if (updatedCurrentAnnotation !== undefined) {
+      context.updatePriorAnnotations(updatedCurrentAnnotation);
+    } else {
+      context.addToPriorAnnotations(updatedCurrentAnnotation);
+    }
+
+    context.setCurrentAnnotation({
+      type: form.values.type,
+      notes: "",
+      annotationHexes: [],
+      createdAt: new Date(),
+      modifiedAt: new Date(),
+    });
   };
 
   return (
@@ -59,7 +86,7 @@ function AnnotationInput() {
         />
         <Group mt="md" justify="center">
           <Button type="submit" variant="outline" color="green">
-            Add Annotation
+            Add/Update Annotation
           </Button>
           <Button
             type="button"
