@@ -24,13 +24,6 @@ function AnnotationInput() {
     validate: {
       notes: (value) => (value === "" ? "Please enter notes" : null),
     },
-    // onValuesChange: (values) => {
-    //   const updatedCurrentAnnotation = { ...context.currentAnnotation };
-    //   updatedCurrentAnnotation.type = values.type;
-    //   updatedCurrentAnnotation.notes = values.notes;
-
-    //   context.setCurrentAnnotation(updatedCurrentAnnotation);
-    // },
   });
 
   useEffect(() => {
@@ -45,6 +38,7 @@ function AnnotationInput() {
   }, [context.currentAnnotation]);
 
   const handleSubmit = (formValues) => {
+    context.setUpdatingAnnotation(false);
     const updatedCurrentAnnotation = { ...context.currentAnnotation };
     updatedCurrentAnnotation.type = formValues.type;
     updatedCurrentAnnotation.notes = formValues.notes;
@@ -64,9 +58,20 @@ function AnnotationInput() {
     });
   };
 
+  const handleReset = (formValues) => {
+    context.setUpdatingAnnotation(false);
+    form.reset();
+  };
+
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Fieldset legend="Edit Annotation">
+      <Fieldset
+        legend={
+          context.updatingAnnotation
+            ? "Edit Existing Annotation"
+            : "New Annotation"
+        }
+      >
         <NativeSelect
           {...form.getInputProps("type")}
           withAsterisk
@@ -86,15 +91,17 @@ function AnnotationInput() {
         />
         <Group mt="md" justify="center">
           <Button type="submit" variant="outline" color="green">
-            Add/Update Annotation
+            {context.updatingAnnotation
+              ? "Update Annotation"
+              : "Add Annotation"}
           </Button>
           <Button
             type="button"
             variant="light"
             color="red"
-            onClick={() => form.reset()}
+            onClick={handleReset}
           >
-            Clear Annotation
+            {context.updatingAnnotation ? "Cancel Update" : "Clear Annotation"}
           </Button>
         </Group>
       </Fieldset>

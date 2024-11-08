@@ -30,6 +30,7 @@ function Annotations() {
   const context = useContext(AnnotationsContext);
 
   const handleCardClick = (item) => {
+    context.setUpdatingAnnotation(true);
     console.log(item);
     item.modifiedAt = new Date();
     context.setCurrentAnnotation(item);

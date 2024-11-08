@@ -30,7 +30,8 @@ const AnnotationsContextProvider = ({ children }) => {
     },
   ]);
 
-  let currentIndex = 3;
+  const [currentIndex, setCurrentIndex] = useState(3);
+  const [updatingAnnotation, setUpdatingAnnotation] = useState(false);
 
   const [currentAnnotation, setCurrentAnnotation] = useState({
     type: "Area of Interest",
@@ -46,7 +47,7 @@ const AnnotationsContextProvider = ({ children }) => {
       ...annotation,
     };
     setPriorAnnotations((priors) => [...priors, annotation]);
-    currentIndex += 1;
+    setCurrentIndex(currentIndex + 1);
   };
 
   const updatePriorAnnotations = (annotation) => {
@@ -76,6 +77,8 @@ const AnnotationsContextProvider = ({ children }) => {
       value={{
         priorAnnotations,
         currentAnnotation,
+        updatingAnnotation,
+        setUpdatingAnnotation,
         setCurrentAnnotation,
         setPriorAnnotations,
         addToPriorAnnotations,
