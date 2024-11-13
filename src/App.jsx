@@ -21,6 +21,7 @@ import MainContent from "./components/MainContent";
 import { useState } from "react";
 import { useField } from "@mantine/form";
 import { AnnotationsContextProvider } from "./context/AnnotationsContext";
+import Legend from "./components/Legend";
 
 function App() {
   const [navBarOpened, { toggle }] = useDisclosure();
@@ -80,7 +81,8 @@ function App() {
                 hiddenFrom="sm"
                 size="sm"
               />
-              <GiHarborDock size={30} />
+              {/* <GiHarborDock size={30} /> */}
+              <Legend />
               <Title order={2}>Buzzards Bay Interview Tool</Title>
             </Group>
           </AppShell.Header>

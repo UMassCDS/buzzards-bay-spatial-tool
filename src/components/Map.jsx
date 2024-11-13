@@ -6,18 +6,24 @@ import {
   Polygon,
   FeatureGroup,
   useMap,
+  Popup,
   useMapEvents,
+  Marker,
 } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
+import "../styles/Map.css";
 import L from "leaflet";
 import * as h3 from "h3-js";
 import { useEffect, useState, useContext } from "react";
 
+import { RedColorGradient } from "../util/ColorPicker.js";
+
 window.type = true;
 
 const HEX_RESOLUTION = 9;
+const SENSOR_DATA_PATH = "../../data/example_sites/sites.json";
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -41,6 +47,59 @@ const h3IDsToGeoBoundary = ({ hexagonsIDs }) => {
     color: "#4eaee4",
   }));
 };
+
+function SensorLayer() {
+  const [markers, setMarkers] = useState([]);
+
+  useEffect(() => {
+    async function fetchSensorMarkers() {
+      try {
+        const response = await fetch(SENSOR_DATA_PATH);
+        const sites = await response.json();
+        const siteMarkers = sites.map((site) => {
+          const popupText =
+            `SITE: ${site["site"]}\n` +
+            `Description: ${site["description"]}\n` +
+            `Tide Station: ${site["tide_station"]}\n` +
+            `Ran1: ${site["ran1"]}\n` +
+            `Ran2: ${site["ran2"]}`;
+
+          const color = RedColorGradient(site["ran1"]);
+          const customIcon = L.divIcon({
+            className: "custom-div-icon",
+            html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
+          });
+
+          return L.marker([site["latitude"], site["longitude"]], {
+            icon: customIcon,
+          }).bindPopup(popupText);
+        });
+        setMarkers(siteMarkers);
+      } catch (error) {
+        console.error("Error fetching sensor markers:", error);
+      }
+    }
+
+    fetchSensorMarkers();
+  }, []);
+
+  return (
+    <FeatureGroup>
+      {markers.map((marker, index) => (
+        <Marker
+          key={index}
+          position={marker.getLatLng()}
+          icon={marker.options.icon}
+        >
+          <Popup>{marker.getPopup().getContent()}</Popup>
+        </Marker>
+      ))}
+    </FeatureGroup>
+  );
+}
 
 function SelectionLayer({ hexagons }) {
   return (
@@ -99,14 +158,10 @@ function Map() {
     if (isAdd) {
       const uniqueSet = new Set([...multiSelectHexagons, ...selectedHexagons]);
       const arr = Array.from(uniqueSet);
-      // console.log(arr);
       setSelectedHexagons(arr);
     } else {
       const setHexagonIDs = new Set(multiSelectHexagons);
       const leftOver = selectedHexagons.filter((id) => !setHexagonIDs.has(id));
-      // console.log(selectedHexagons);
-      // console.log(setHexagonIDs);
-      // console.log(leftOver);
       setSelectedHexagons(leftOver);
     }
   }, [multiSelectHexagons]);
@@ -120,28 +175,6 @@ function Map() {
       const hexagonIDs = h3.polygonToCells(polygonCoords, HEX_RESOLUTION);
       setMultiSelectHexagons(hexagonIDs);
       setIsAdd(e.layerType === "polygon");
-
-      // polygonCoords.map((latlng) =>
-      //   hexagonIDs.push(h3.latLngToCell(latlng[0], latlng[1], HEX_RESOLUTION))
-      // );
-
-      // if (e.layerType === "polygon") {
-
-      //   // const uniqueSet = new Set([...hexagonIDs, ...selectedHexagons]);
-      //   // // console.log(uniqueSet);
-      //   // const arr = Array.from(uniqueSet);
-      //   // console.log(arr);
-      //   // setSelectedHexagons(arr);
-      // } else {
-      //   const setHexagonIDs = new Set(hexagonIDs);
-      //   const leftOver = selectedHexagons.filter(
-      //     (id) => !setHexagonIDs.has(id)
-      //   );
-      //   console.log(selectedHexagons);
-      //   console.log(setHexagonIDs);
-      //   console.log(leftOver);
-      //   setSelectedHexagons(leftOver);
-      // }
     } catch (error) {
       console.error("Error occurred in multi-select: ", error);
     }
@@ -180,6 +213,9 @@ function Map() {
           <FeatureGroup>
             <SelectionLayer hexagons={hexagonsBoundaries} />
           </FeatureGroup>
+        </LayersControl.Overlay>
+        <LayersControl.Overlay name="Sensors Overlay">
+          <SensorLayer />
         </LayersControl.Overlay>
       </LayersControl>
       <FeatureGroup>
