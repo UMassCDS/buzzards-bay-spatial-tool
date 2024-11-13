@@ -3,34 +3,9 @@ import { createContext, useContext, useState } from "react";
 const AnnotationsContext = createContext();
 
 const AnnotationsContextProvider = ({ children }) => {
-  const [priorAnnotations, setPriorAnnotations] = useState([
-    {
-      index: 0,
-      type: "Area of Interest",
-      notes: "I got fish",
-      annotationHexes: [],
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-    {
-      index: 1,
-      type: "Suggested Sensor Location",
-      notes: "Something",
-      annotationHexes: [],
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-    {
-      index: 2,
-      type: "Comment on existing sensor location",
-      notes: "Another note",
-      annotationHexes: [],
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    },
-  ]);
+  const [priorAnnotations, setPriorAnnotations] = useState([]);
 
-  const [currentIndex, setCurrentIndex] = useState(3);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [updatingAnnotation, setUpdatingAnnotation] = useState(false);
 
   const [currentAnnotation, setCurrentAnnotation] = useState({
@@ -40,6 +15,15 @@ const AnnotationsContextProvider = ({ children }) => {
     createdAt: new Date(),
     modifiedAt: new Date(),
   });
+
+  const updateCurrentAnnotationHexagons = (hexIds) => {
+    const updatedAnnotation = {
+      ...currentAnnotation,
+      annotationHexes: hexIds,
+    };
+
+    setCurrentAnnotation(updatedAnnotation);
+  };
 
   const addToPriorAnnotations = (annotation) => {
     annotation = {
@@ -78,6 +62,7 @@ const AnnotationsContextProvider = ({ children }) => {
         priorAnnotations,
         currentAnnotation,
         updatingAnnotation,
+        updateCurrentAnnotationHexagons,
         setUpdatingAnnotation,
         setCurrentAnnotation,
         setPriorAnnotations,

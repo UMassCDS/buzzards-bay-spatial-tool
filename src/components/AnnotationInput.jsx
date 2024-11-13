@@ -60,6 +60,13 @@ function AnnotationInput() {
 
   const handleReset = (formValues) => {
     context.setUpdatingAnnotation(false);
+    context.setCurrentAnnotation({
+      type: "Area of Interest",
+      notes: "",
+      annotationHexes: [],
+      createdAt: new Date(),
+      modifiedAt: new Date(),
+    });
     form.reset();
   };
 

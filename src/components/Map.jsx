@@ -19,6 +19,7 @@ import * as h3 from "h3-js";
 import { useEffect, useState, useContext } from "react";
 
 import { RedColorGradient } from "../util/ColorPicker.js";
+import { AnnotationsContext } from "../context/AnnotationsContext";
 
 window.type = true;
 
@@ -130,11 +131,17 @@ const ClickHandler = ({ onAddSelectionHexagon }) => {
 };
 
 function Map() {
+  const context = useContext(AnnotationsContext);
   const [selectedHexagons, setSelectedHexagons] = useState([]);
   const [hexagonsBoundaries, setHexagonsBoundaries] = useState([]);
 
   const [multiSelectHexagons, setMultiSelectHexagons] = useState([]);
   const [isAdd, setIsAdd] = useState(false);
+
+  useEffect(() => {
+    const currentHexIds = context.currentAnnotation.annotationHexes;
+    setSelectedHexagons(currentHexIds);
+  }, [context.currentAnnotation]);
 
   useEffect(() => {
     const newHexagonsBoundaries = h3IDsToGeoBoundary({
@@ -145,13 +152,15 @@ function Map() {
 
   const onAddSelectionHexagon = (hexagonID) => {
     const idx = selectedHexagons.indexOf(hexagonID);
+    let newSelects;
     if (idx > -1) {
-      const newSelects = [...selectedHexagons];
+      newSelects = [...selectedHexagons];
       newSelects.splice(idx, 1);
-      setSelectedHexagons(newSelects);
     } else {
-      setSelectedHexagons([...selectedHexagons, hexagonID]);
+      newSelects = [...selectedHexagons, hexagonID];
     }
+    setSelectedHexagons(newSelects);
+    context.updateCurrentAnnotationHexagons(newSelects);
   };
 
   useEffect(() => {
@@ -159,10 +168,12 @@ function Map() {
       const uniqueSet = new Set([...multiSelectHexagons, ...selectedHexagons]);
       const arr = Array.from(uniqueSet);
       setSelectedHexagons(arr);
+      context.updateCurrentAnnotationHexagons(arr);
     } else {
       const setHexagonIDs = new Set(multiSelectHexagons);
       const leftOver = selectedHexagons.filter((id) => !setHexagonIDs.has(id));
       setSelectedHexagons(leftOver);
+      context.updateCurrentAnnotationHexagons(leftOver);
     }
   }, [multiSelectHexagons]);
 
