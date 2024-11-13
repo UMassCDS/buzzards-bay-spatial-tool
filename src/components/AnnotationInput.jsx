@@ -27,46 +27,29 @@ function AnnotationInput() {
   });
 
   useEffect(() => {
-    const { type, notes } = context.currentAnnotation;
-
-    if (form.values.type !== type || form.values.notes !== notes) {
-      form.setValues({
-        type: type,
-        notes: notes,
-      });
-    }
+    form.setValues({
+      type: context.currentAnnotation.type,
+      notes: context.currentAnnotation.notes,
+    });
   }, [context.currentAnnotation]);
 
   const handleSubmit = (formValues) => {
     context.setUpdatingAnnotation(false);
-    const updatedCurrentAnnotation = { ...context.currentAnnotation };
-    updatedCurrentAnnotation.type = formValues.type;
-    updatedCurrentAnnotation.notes = formValues.notes;
+    const updatedAnnotation = {
+      ...context.currentAnnotation,
+      ...formValues,
+    };
 
-    if (updatedCurrentAnnotation !== undefined) {
-      context.updatePriorAnnotations(updatedCurrentAnnotation);
+    if (context.updatingAnnotation) {
+      context.updatePriorAnnotations(updatedAnnotation);
     } else {
-      context.addToPriorAnnotations(updatedCurrentAnnotation);
+      context.addToPriorAnnotations(updatedAnnotation);
     }
-
-    context.setCurrentAnnotation({
-      type: form.values.type,
-      notes: "",
-      annotationHexes: [],
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    });
+    context.resetCurrentAnnotation();
   };
 
   const handleReset = (formValues) => {
-    context.setUpdatingAnnotation(false);
-    context.setCurrentAnnotation({
-      type: "Area of Interest",
-      notes: "",
-      annotationHexes: [],
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    });
+    context.resetCurrentAnnotation();
     form.reset();
   };
 
@@ -88,15 +71,17 @@ function AnnotationInput() {
             "Suggested Sensor Location",
             "Comment on existing sensor location",
           ]}
-          mt="md"
+          onChange={(event) => {
+            form.setFieldValue("type", event.currentTarget.value);
+            context.updateCurrentAnnotationType(event.currentTarget.value);
+          }}
         />
         <Textarea
           {...form.getInputProps("notes")}
           label="Annotation Notes"
           placeholder="Enter your comments about the selected region"
-          mt="md"
         />
-        <Group mt="md" justify="center">
+        <Group mt="md">
           <Button type="submit" variant="outline" color="green">
             {context.updatingAnnotation
               ? "Update Annotation"

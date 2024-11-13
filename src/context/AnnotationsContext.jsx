@@ -50,6 +50,24 @@ const AnnotationsContextProvider = ({ children }) => {
     }
   };
 
+  const resetCurrentAnnotation = () => {
+    setUpdatingAnnotation(false);
+    setCurrentAnnotation({
+      type: "Area of Interest",
+      notes: "",
+      annotationHexes: [],
+      createdAt: new Date(),
+      modifiedAt: new Date(),
+    });
+  };
+
+  const updateCurrentAnnotationType = (newType) => {
+    setCurrentAnnotation((prevAnnotation) => ({
+      ...prevAnnotation,
+      type: newType,
+    }));
+  };
+
   const deleteFromPriorAnnotations = (annotation) => {
     setPriorAnnotations(
       [...priorAnnotations].filter((value) => annotation.index !== value.index)
@@ -62,6 +80,8 @@ const AnnotationsContextProvider = ({ children }) => {
         priorAnnotations,
         currentAnnotation,
         updatingAnnotation,
+        updateCurrentAnnotationType,
+        resetCurrentAnnotation,
         updateCurrentAnnotationHexagons,
         setUpdatingAnnotation,
         setCurrentAnnotation,

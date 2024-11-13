@@ -37,15 +37,30 @@ L.drawLocal.draw.handlers.polygon.tooltip.cont =
 L.drawLocal.draw.handlers.polygon.tooltip.end =
   "Click the first point to finish drawing and fill the shape with hexagons";
 
-const h3IDsToGeoBoundary = ({ hexagonsIDs }) => {
+const getTypeColor = (type) => {
+  switch (type) {
+    case "Area of Interest":
+      return "#4eaee4"; // blue
+    case "Suggested Sensor Location":
+      return "#28a745"; // green
+    case "Comment on existing sensor location":
+      return "#ffc107"; // yellow
+    default:
+      return "#4eaee4"; // blue
+  }
+};
+
+const h3IDsToGeoBoundary = ({ hexagonsIDs, type }) => {
   if (!hexagonsIDs) {
     return [];
   }
 
+  const color = getTypeColor(type);
+
   return hexagonsIDs.map((hexID) => ({
     id: hexID,
     boundary: h3.cellToBoundary(hexID, false).map(([lat, lng]) => [lat, lng]),
-    color: "#4eaee4",
+    color: color,
   }));
 };
 
@@ -141,14 +156,15 @@ function Map() {
   useEffect(() => {
     const currentHexIds = context.currentAnnotation.annotationHexes;
     setSelectedHexagons(currentHexIds);
-  }, [context.currentAnnotation]);
+  }, [context.currentAnnotation.annotationHexes]);
 
   useEffect(() => {
     const newHexagonsBoundaries = h3IDsToGeoBoundary({
       hexagonsIDs: selectedHexagons,
+      type: context.currentAnnotation.type,
     });
     setHexagonsBoundaries(newHexagonsBoundaries);
-  }, [selectedHexagons]);
+  }, [selectedHexagons, context.currentAnnotation.type]);
 
   const onAddSelectionHexagon = (hexagonID) => {
     const idx = selectedHexagons.indexOf(hexagonID);
