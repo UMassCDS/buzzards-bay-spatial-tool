@@ -8,22 +8,42 @@ const AnnotationsContextProvider = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [updatingAnnotation, setUpdatingAnnotation] = useState(false);
 
-  const [currentAnnotation, setCurrentAnnotation] = useState({
+  // const [currentAnnotation, setCurrentAnnotation] = useState({
+  //   type: "Area of Interest",
+  //   notes: "",
+  //   annotationHexes: [],
+  //   createdAt: new Date(),
+  //   modifiedAt: new Date(),
+  // });
+
+  const [currentNotes, setCurrentNotes] = useState({
     type: "Area of Interest",
     notes: "",
-    annotationHexes: [],
     createdAt: new Date(),
     modifiedAt: new Date(),
   });
 
-  const updateCurrentAnnotationHexagons = (hexIds) => {
-    const updatedAnnotation = {
-      ...currentAnnotation,
-      annotationHexes: hexIds,
-    };
+  const [currentHexes, setCurrentHexes] = useState([]);
 
-    setCurrentAnnotation(updatedAnnotation);
+  const setCurrentAnnotation = (annotation) => {
+    setCurrentNotes({
+      index: annotation["index"],
+      type: annotation["type"],
+      notes: annotation["notes"],
+      createdAt: annotation["createdAt"],
+      modifiedAt: annotation["modifiedAt"],
+    });
+    setCurrentHexes(annotation["annotationHexes"]);
   };
+
+  // const updateCurrentAnnotationHexagons = (hexIds) => {
+  //   const updatedAnnotation = {
+  //     ...currentAnnotation,
+  //     annotationHexes: hexIds,
+  //   };
+
+  //   setCurrentAnnotation(updatedAnnotation);
+  // };
 
   const addToPriorAnnotations = (annotation) => {
     annotation = {
@@ -52,18 +72,19 @@ const AnnotationsContextProvider = ({ children }) => {
 
   const resetCurrentAnnotation = () => {
     setUpdatingAnnotation(false);
-    setCurrentAnnotation({
+    setCurrentNotes({
       type: "Area of Interest",
       notes: "",
-      annotationHexes: [],
       createdAt: new Date(),
       modifiedAt: new Date(),
     });
+
+    setCurrentHexes([]);
   };
 
   const updateCurrentAnnotationType = (newType) => {
-    setCurrentAnnotation((prevAnnotation) => ({
-      ...prevAnnotation,
+    setCurrentNotes((prevNotes) => ({
+      ...prevNotes,
       type: newType,
     }));
   };
@@ -78,11 +99,13 @@ const AnnotationsContextProvider = ({ children }) => {
     <AnnotationsContext.Provider
       value={{
         priorAnnotations,
-        currentAnnotation,
+        currentNotes,
+        currentHexes,
         updatingAnnotation,
+        setCurrentNotes,
+        setCurrentHexes,
         updateCurrentAnnotationType,
         resetCurrentAnnotation,
-        updateCurrentAnnotationHexagons,
         setUpdatingAnnotation,
         setCurrentAnnotation,
         setPriorAnnotations,

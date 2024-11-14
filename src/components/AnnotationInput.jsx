@@ -18,8 +18,8 @@ function AnnotationInput() {
   const form = useForm({
     mode: "controlled",
     initialValues: {
-      type: context.currentAnnotation.type,
-      notes: context.currentAnnotation.notes,
+      type: context.currentNotes.type,
+      notes: context.currentNotes.notes,
     },
     validate: {
       notes: (value) => (value === "" ? "Please enter notes" : null),
@@ -28,24 +28,21 @@ function AnnotationInput() {
 
   useEffect(() => {
     form.setValues({
-      type: context.currentAnnotation.type,
-      notes: context.currentAnnotation.notes,
+      type: context.currentNotes.type,
+      notes: context.currentNotes.notes,
     });
-  }, [context.currentAnnotation]);
+  }, [context.currentNotes]);
 
   const handleSubmit = (formValues) => {
-    context.setUpdatingAnnotation(false);
     const updatedAnnotation = {
-      ...context.currentAnnotation,
+      ...context.currentNotes,
       ...formValues,
+      annotationHexes: context.currentHexes,
     };
 
-    if (context.updatingAnnotation) {
-      context.updatePriorAnnotations(updatedAnnotation);
-    } else {
-      context.addToPriorAnnotations(updatedAnnotation);
-    }
+    context.updatePriorAnnotations(updatedAnnotation);
     context.resetCurrentAnnotation();
+    context.setUpdatingAnnotation(false);
   };
 
   const handleReset = (formValues) => {
@@ -73,7 +70,15 @@ function AnnotationInput() {
           ]}
           onChange={(event) => {
             form.setFieldValue("type", event.currentTarget.value);
-            context.updateCurrentAnnotationType(event.currentTarget.value);
+            // context.updateCurrentAnnotationType(event.currentTarget.value);
+            const updatedNotes = {
+              ...context.currentNotes,
+              ...form.values,
+              type: event.currentTarget.value,
+            };
+
+            console.log(updatedNotes);
+            context.setCurrentNotes(updatedNotes);
           }}
         />
         <Textarea

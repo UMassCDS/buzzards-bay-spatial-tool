@@ -117,6 +117,20 @@ function SensorLayer() {
   );
 }
 
+function PriorAnnotationsLayer({ hexagons }) {
+  return (
+    <>
+      {hexagons.map((hex, idx) => (
+        <Polygon
+          key={idx}
+          positions={hex.boundary}
+          pathOptions={{ color: hex.color, fillColor: hex.color, opacity: 0.4 }}
+        />
+      ))}
+    </>
+  );
+}
+
 function SelectionLayer({ hexagons }) {
   return (
     <>
@@ -150,21 +164,33 @@ function Map() {
   const [selectedHexagons, setSelectedHexagons] = useState([]);
   const [hexagonsBoundaries, setHexagonsBoundaries] = useState([]);
 
+  const [priorAnnotations, setPriorAnnotations] = useState([]);
+
   const [multiSelectHexagons, setMultiSelectHexagons] = useState([]);
   const [isAdd, setIsAdd] = useState(false);
 
   useEffect(() => {
-    const currentHexIds = context.currentAnnotation.annotationHexes;
+    const currentHexIds = context.currentHexes;
     setSelectedHexagons(currentHexIds);
-  }, [context.currentAnnotation.annotationHexes]);
+  }, [context.currentHexes]);
 
   useEffect(() => {
     const newHexagonsBoundaries = h3IDsToGeoBoundary({
       hexagonsIDs: selectedHexagons,
-      type: context.currentAnnotation.type,
+      type: context.currentNotes.type,
     });
     setHexagonsBoundaries(newHexagonsBoundaries);
-  }, [selectedHexagons, context.currentAnnotation.type]);
+  }, [selectedHexagons, context.currentNotes.type]);
+
+  useEffect(() => {
+    const hexs = context.priorAnnotations.flatMap((annotation) =>
+      h3IDsToGeoBoundary({
+        hexagonsIDs: annotation.annotationHexes,
+        type: annotation.type,
+      })
+    );
+    setPriorAnnotations(hexs);
+  }, [context.priorAnnotations]);
 
   const onAddSelectionHexagon = (hexagonID) => {
     const idx = selectedHexagons.indexOf(hexagonID);
@@ -176,7 +202,7 @@ function Map() {
       newSelects = [...selectedHexagons, hexagonID];
     }
     setSelectedHexagons(newSelects);
-    context.updateCurrentAnnotationHexagons(newSelects);
+    context.setCurrentHexes(newSelects);
   };
 
   useEffect(() => {
@@ -184,12 +210,12 @@ function Map() {
       const uniqueSet = new Set([...multiSelectHexagons, ...selectedHexagons]);
       const arr = Array.from(uniqueSet);
       setSelectedHexagons(arr);
-      context.updateCurrentAnnotationHexagons(arr);
+      context.setCurrentHexes(arr);
     } else {
       const setHexagonIDs = new Set(multiSelectHexagons);
       const leftOver = selectedHexagons.filter((id) => !setHexagonIDs.has(id));
       setSelectedHexagons(leftOver);
-      context.updateCurrentAnnotationHexagons(leftOver);
+      context.setCurrentHexes(leftOver);
     }
   }, [multiSelectHexagons]);
 
@@ -239,6 +265,11 @@ function Map() {
         <LayersControl.Overlay checked name="Current Annotation">
           <FeatureGroup>
             <SelectionLayer hexagons={hexagonsBoundaries} />
+          </FeatureGroup>
+        </LayersControl.Overlay>
+        <LayersControl.Overlay name="Prior Annotations">
+          <FeatureGroup>
+            <PriorAnnotationsLayer hexagons={priorAnnotations} />
           </FeatureGroup>
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Sensors Overlay">
