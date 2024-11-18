@@ -18,12 +18,13 @@ import "./App.css";
 
 import NavBar from "./components/NavBar";
 import MainContent from "./components/MainContent";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useField } from "@mantine/form";
-import { AnnotationsContextProvider } from "./context/AnnotationsContext";
+import { AnnotationsContext } from "./context/AnnotationsContext";
 import Legend from "./components/Legend";
 
 function App() {
+  const context = useContext(AnnotationsContext);
   const [navBarOpened, { toggle }] = useDisclosure();
   const [modalOpened, { open, close }] = useDisclosure(true);
   const validationFunction = (value) => {
@@ -33,75 +34,77 @@ function App() {
       return true;
     }
   };
+
   const userCodeField = useField({
     initialValue: "",
     validate: (value) => (validationFunction(value) ? "Code not valid" : null),
   });
 
   return (
-    <AnnotationsContextProvider>
-      <MantineProvider>
-        <AppShell
-          header={{ height: 60 }}
-          navbar={{
-            width: "30vw",
-            breakpoint: "sm",
-            collapsed: { mobile: !navBarOpened },
-          }}
-          padding="xs"
+    <MantineProvider>
+      <AppShell
+        header={{ height: 60 }}
+        navbar={{
+          width: "30vw",
+          breakpoint: "sm",
+          collapsed: { mobile: !navBarOpened },
+        }}
+        padding="xs"
+      >
+        <Modal
+          opened={modalOpened}
+          onClose={close}
+          title="Login"
+          closeOnClickOutside={false}
+          closeOnEscape={false}
+          withCloseButton={false}
+          trapFocus
         >
-          <Modal
-            opened={modalOpened}
-            onClose={close}
-            title="Login"
-            closeOnClickOutside={false}
-            closeOnEscape={false}
-            withCloseButton={false}
-            trapFocus
-          >
-            <TextInput
-              {...userCodeField.getInputProps()}
-              required={true}
-              label="User code"
-              description="Unique identifier for the interviewee, you must enter code to proceed"
-              mb="md"
-            />
-            <Button
-              disabled={!validationFunction(userCodeField.getValue())}
-              onClick={close}
-            >
-              Log in
-            </Button>
-          </Modal>
-          <AppShell.Header>
-            <Group h="100%" px="sm">
-              <Burger
-                opened={navBarOpened}
-                onClick={toggle}
-                hiddenFrom="sm"
-                size="sm"
-              />
-              {/* <GiHarborDock size={30} /> */}
-              <Legend />
-              <Title order={2}>Buzzards Bay Interview Tool</Title>
-            </Group>
-          </AppShell.Header>
-          <AppShell.Navbar
-            p="md"
-            style={{
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
+          <TextInput
+            {...userCodeField.getInputProps()}
+            required={true}
+            label="User code"
+            description="Unique identifier for the interviewee, you must enter code to proceed"
+            mb="md"
+          />
+          <Button
+            disabled={!validationFunction(userCodeField.getValue())}
+            onClick={() => {
+              context.setIntervieweeId(userCodeField.getValue());
+              close();
             }}
           >
-            <NavBar code={userCodeField.getValue()} />
-          </AppShell.Navbar>
-          <AppShell.Main>
-            <MainContent />
-          </AppShell.Main>
-        </AppShell>
-      </MantineProvider>
-    </AnnotationsContextProvider>
+            Log in
+          </Button>
+        </Modal>
+        <AppShell.Header>
+          <Group h="100%" px="sm">
+            <Burger
+              opened={navBarOpened}
+              onClick={toggle}
+              hiddenFrom="sm"
+              size="sm"
+            />
+            {/* <GiHarborDock size={30} /> */}
+            <Legend />
+            <Title order={2}>Buzzards Bay Interview Tool</Title>
+          </Group>
+        </AppShell.Header>
+        <AppShell.Navbar
+          p="md"
+          style={{
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <NavBar code={userCodeField.getValue()} />
+        </AppShell.Navbar>
+        <AppShell.Main>
+          <MainContent />
+        </AppShell.Main>
+      </AppShell>
+    </MantineProvider>
   );
 }
 

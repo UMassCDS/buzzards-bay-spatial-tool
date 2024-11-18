@@ -124,7 +124,11 @@ function PriorAnnotationsLayer({ hexagons }) {
         <Polygon
           key={idx}
           positions={hex.boundary}
-          pathOptions={{ color: hex.color, fillColor: hex.color, opacity: 0.4 }}
+          pathOptions={{
+            color: hex.color,
+            fillColor: hex.color,
+            opacity: 0.25,
+          }}
         />
       ))}
     </>

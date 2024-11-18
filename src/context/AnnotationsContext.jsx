@@ -23,6 +23,8 @@ const AnnotationsContextProvider = ({ children }) => {
     modifiedAt: new Date(),
   });
 
+  const [intervieweeId, setIntervieweeId] = useState("");
+
   const [currentHexes, setCurrentHexes] = useState([]);
 
   const setCurrentAnnotation = (annotation) => {
@@ -95,6 +97,14 @@ const AnnotationsContextProvider = ({ children }) => {
     );
   };
 
+  const saveInterview = () => {
+    const interview = {};
+    interview.intervieweeId = intervieweeId;
+    interview.annotations = priorAnnotations;
+
+    return interview;
+  };
+
   return (
     <AnnotationsContext.Provider
       value={{
@@ -102,6 +112,9 @@ const AnnotationsContextProvider = ({ children }) => {
         currentNotes,
         currentHexes,
         updatingAnnotation,
+        intervieweeId,
+        setIntervieweeId,
+        saveInterview,
         setCurrentNotes,
         setCurrentHexes,
         updateCurrentAnnotationType,
