@@ -1,0 +1,218 @@
+{
+  "intervieweeId": "103",
+  "annotations": [
+    {
+      "index": 0,
+      "type": "Area of Interest",
+      "notes": "My first area of interest",
+      "createdAt": "2024-11-18T15:19:06.190Z",
+      "modifiedAt": "2024-11-18T15:19:06.190Z",
+      "annotationHexes": [
+        "892a06d547bffff",
+        "892a06d5417ffff",
+        "892a06d542fffff",
+        "892a06d54abffff",
+        "892a06d5447ffff",
+        "892a06d5477ffff",
+        "892a06d5413ffff",
+        "892a06d736fffff",
+        "892a06d548fffff",
+        "892a06d55d3ffff",
+        "892a06d542bffff",
+        "892a06d54a7ffff",
+        "892a06d5473ffff",
+        "892a06d540fffff",
+        "892a06d736bffff",
+        "892a06d5427ffff",
+        "892a06d54a3ffff",
+        "892a06d54bbffff",
+        "892a06d5457ffff",
+        "892a06d540bffff",
+        "892a06d55cbffff",
+        "892a06d5423ffff",
+        "892a06d543bffff",
+        "892a06d54b7ffff",
+        "892a06d5407ffff",
+        "892a06d737bffff",
+        "892a06d5437ffff",
+        "892a06d54b3ffff",
+        "892a06d544fffff",
+        "892a06d5467ffff",
+        "892a06d5403ffff",
+        "892a06d541bffff",
+        "892a06d55dbffff",
+        "892a06d5433ffff",
+        "892a06d54afffff",
+        "892a06d5463ffff",
+        "892a06d548bffff",
+        "892a06d5097ffff",
+        "892a06d7373ffff"
+      ]
+    },
+    {
+      "index": 1,
+      "type": "Area of Interest",
+      "notes": "My second area of interest",
+      "createdAt": "2024-11-18T15:19:38.374Z",
+      "modifiedAt": "2024-11-18T15:19:38.374Z",
+      "annotationHexes": [
+        "892a06d2947ffff",
+        "892a06d2ba7ffff",
+        "892a06d2943ffff",
+        "892a06d76dbffff",
+        "892a06d2ba3ffff",
+        "892a06d297bffff",
+        "892a06d295bffff",
+        "892a06d29cfffff",
+        "892a06d2bbbffff",
+        "892a06d7643ffff",
+        "892a06d2957ffff",
+        "892a06d2b27ffff",
+        "892a06d2bb7ffff",
+        "892a06d2953ffff",
+        "892a06d765bffff",
+        "892a06d2bb3ffff",
+        "892a06d294fffff",
+        "892a06d76cbffff",
+        "892a06d2bafffff",
+        "892a06d294bffff",
+        "892a06d7653ffff",
+        "892a06d2b37ffff",
+        "892a06d2babffff",
+        "892a06d29c3ffff",
+        "892a06d290bffff",
+        "892a06d296bffff",
+        "892a06d76cfffff",
+        "892a06d7647ffff",
+        "892a06d764bffff",
+        "892a06d282fffff"
+      ]
+    },
+    {
+      "index": 2,
+      "type": "Area of Interest",
+      "notes": "My third area of interest",
+      "createdAt": "2024-11-18T15:19:59.594Z",
+      "modifiedAt": "2024-11-18T15:19:59.594Z",
+      "annotationHexes": [
+        "892a316d557ffff",
+        "892a316d427ffff",
+        "892a316d553ffff",
+        "892a316d55bffff",
+        "892a316d50bffff",
+        "892a316d543ffff",
+        "892a316d42fffff",
+        "892a316d54bffff",
+        "892a316d503ffff",
+        "892a316d437ffff"
+      ]
+    },
+    {
+      "index": 3,
+      "type": "Area of Interest",
+      "notes": "My fourth area of interest",
+      "createdAt": "2024-11-18T15:20:16.797Z",
+      "modifiedAt": "2024-11-18T15:20:16.797Z",
+      "annotationHexes": [
+        "892a316f143ffff",
+        "892a316f023ffff",
+        "892a316f007ffff",
+        "892a316f03bffff",
+        "892a316f173ffff",
+        "892a316f00fffff",
+        "892a316f037ffff",
+        "892a316f147ffff",
+        "892a316f027ffff",
+        "892a316f153ffff",
+        "892a316f033ffff",
+        "892a316f077ffff",
+        "892a316f017ffff",
+        "892a316f10bffff",
+        "892a316f17bffff",
+        "892a316f02fffff",
+        "892a316f02bffff",
+        "892a316f067ffff",
+        "892a316f063ffff"
+      ]
+    },
+    {
+      "index": 4,
+      "type": "Suggested Sensor Location",
+      "notes": "My first suggestion",
+      "createdAt": "2024-11-18T15:20:39.898Z",
+      "modifiedAt": "2024-11-18T15:20:39.898Z",
+      "annotationHexes": [
+        "892a316e2d3ffff",
+        "892a316e2dbffff",
+        "892a316f537ffff",
+        "892a316f523ffff",
+        "892a316e66fffff"
+      ]
+    },
+    {
+      "index": 5,
+      "type": "Suggested Sensor Location",
+      "notes": "My second suggestion",
+      "createdAt": "2024-11-18T15:20:56.581Z",
+      "modifiedAt": "2024-11-18T15:20:56.581Z",
+      "annotationHexes": [
+        "892a317b233ffff",
+        "892a317b223ffff",
+        "892a317b227ffff",
+        "892a317b237ffff"
+      ]
+    },
+    {
+      "index": 6,
+      "type": "Suggested Sensor Location",
+      "notes": "My third suggestion",
+      "createdAt": "2024-11-18T15:21:22.942Z",
+      "modifiedAt": "2024-11-18T15:21:22.942Z",
+      "annotationHexes": [
+        "892a317b033ffff",
+        "892a317b023ffff",
+        "892a317b02fffff"
+      ]
+    },
+    {
+      "index": 7,
+      "type": "Comment on existing sensor location",
+      "notes": "My first comment",
+      "createdAt": "2024-11-18T15:21:36.430Z",
+      "modifiedAt": "2024-11-18T15:21:36.430Z",
+      "annotationHexes": [
+        "892a316ae17ffff"
+      ]
+    },
+    {
+      "index": 8,
+      "type": "Comment on existing sensor location",
+      "notes": "My second comment",
+      "createdAt": "2024-11-18T15:21:52.050Z",
+      "modifiedAt": "2024-11-18T15:21:52.050Z",
+      "annotationHexes": [
+        "892a3178a53ffff"
+      ]
+    },
+    {
+      "index": 9,
+      "type": "Comment on existing sensor location",
+      "notes": "My third comment",
+      "createdAt": "2024-11-18T15:22:07.803Z",
+      "modifiedAt": "2024-11-18T15:22:07.803Z",
+      "annotationHexes": [
+        "892a3179d1bffff"
+      ]
+    },
+    {
+      "index": 10,
+      "type": "Comment on existing sensor location",
+      "notes": "My fourth comment",
+      "createdAt": "2024-11-18T15:22:21.159Z",
+      "modifiedAt": "2024-11-18T15:22:21.159Z",
+      "annotationHexes": [
+        "892a317b24bffff"
+      ]
+    }
+  ]
+}

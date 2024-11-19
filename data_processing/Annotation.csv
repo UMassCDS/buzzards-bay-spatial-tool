@@ -1,0 +1,31 @@
+InterviewID,AnnotationID,CreatedAt,ModifiedAt,AnnotationType,AnnotationNote
+0,0,2024-11-18T15:11:23.126Z,2024-11-18T15:11:23.126Z,0,My first area of interest
+0,1,2024-11-18T15:12:25.046Z,2024-11-18T15:12:25.046Z,0,My second area of interest
+0,2,2024-11-18T15:12:42.698Z,2024-11-18T15:12:42.698Z,0,My third area of interest
+0,3,2024-11-18T15:12:59.955Z,2024-11-18T15:12:59.955Z,1,My first sensor location suggestion
+0,4,2024-11-18T15:13:28.165Z,2024-11-18T15:13:28.165Z,1,My second sensor location suggestion
+0,5,2024-11-18T15:13:52.011Z,2024-11-18T15:13:52.011Z,1,My third sensor location suggestion
+0,6,2024-11-18T15:14:14.607Z,2024-11-18T15:14:14.607Z,2,My first existing sensor comment
+0,7,2024-11-18T15:14:35.347Z,2024-11-18T15:14:35.347Z,2,My second existing sensor comment
+0,8,2024-11-18T15:14:54.466Z,2024-11-18T15:14:54.466Z,2,My third existing sensor comment
+1,9,2024-11-18T15:15:28.761Z,2024-11-18T15:15:28.761Z,0,My first area of interest
+1,10,2024-11-18T15:15:53.541Z,2024-11-18T15:15:53.541Z,0,My second area of interest
+1,11,2024-11-18T15:16:12.494Z,2024-11-18T15:16:12.494Z,0,My third area of interest
+1,12,2024-11-18T15:16:32.837Z,2024-11-18T15:16:32.837Z,1,My first sensor location suggestion
+1,13,2024-11-18T15:16:48.031Z,2024-11-18T15:16:48.031Z,1,My second sensor location suggestion
+1,14,2024-11-18T15:17:11.653Z,2024-11-18T15:17:11.653Z,1,My third sensor location suggestion
+1,15,2024-11-18T15:17:45.090Z,2024-11-18T15:17:45.090Z,2,My first comment
+1,16,2024-11-18T15:18:09.512Z,2024-11-18T15:18:09.512Z,2,My second comment
+1,17,2024-11-18T15:18:21.518Z,2024-11-18T15:18:21.518Z,2,My third comment
+1,18,2024-11-18T15:18:32.902Z,2024-11-18T15:18:47.789Z,2,My fourth comment
+2,19,2024-11-18T15:19:06.190Z,2024-11-18T15:19:06.190Z,0,My first area of interest
+2,20,2024-11-18T15:19:38.374Z,2024-11-18T15:19:38.374Z,0,My second area of interest
+2,21,2024-11-18T15:19:59.594Z,2024-11-18T15:19:59.594Z,0,My third area of interest
+2,22,2024-11-18T15:20:16.797Z,2024-11-18T15:20:16.797Z,0,My fourth area of interest
+2,23,2024-11-18T15:20:39.898Z,2024-11-18T15:20:39.898Z,1,My first suggestion
+2,24,2024-11-18T15:20:56.581Z,2024-11-18T15:20:56.581Z,1,My second suggestion
+2,25,2024-11-18T15:21:22.942Z,2024-11-18T15:21:22.942Z,1,My third suggestion
+2,26,2024-11-18T15:21:36.430Z,2024-11-18T15:21:36.430Z,2,My first comment
+2,27,2024-11-18T15:21:52.050Z,2024-11-18T15:21:52.050Z,2,My second comment
+2,28,2024-11-18T15:22:07.803Z,2024-11-18T15:22:07.803Z,2,My third comment
+2,29,2024-11-18T15:22:21.159Z,2024-11-18T15:22:21.159Z,2,My fourth comment
