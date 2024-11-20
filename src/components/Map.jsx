@@ -40,13 +40,13 @@ L.drawLocal.draw.handlers.polygon.tooltip.end =
 const getTypeColor = (type) => {
   switch (type) {
     case "Area of Interest":
-      return "#4eaee4"; // blue
+      return "#137ac2"; // blue
     case "Suggested Sensor Location":
-      return "#28a745"; // green
+      return "#84aa10"; // green
     case "Comment on existing sensor location":
-      return "#ffc107"; // yellow
+      return "#c23b8a"; // pink
     default:
-      return "#4eaee4"; // blue
+      return "#137ac2"; // blue
   }
 };
 
@@ -123,11 +123,13 @@ function PriorAnnotationsLayer({ hexagons }) {
       {hexagons.map((hex, idx) => (
         <Polygon
           key={idx}
+          weight={1}
+          fillOpacity={0.2}
           positions={hex.boundary}
           pathOptions={{
             color: hex.color,
             fillColor: hex.color,
-            opacity: 0.25,
+            opacity: 0.2,
           }}
         />
       ))}
@@ -141,6 +143,7 @@ function SelectionLayer({ hexagons }) {
       {hexagons.map((hex) => (
         <Polygon
           key={hex.id}
+          weight={10}
           positions={hex.boundary}
           pathOptions={{ color: hex.color, fillColor: hex.color }}
         />

@@ -57,19 +57,25 @@ const AnnotationsContextProvider = ({ children }) => {
   };
 
   const updatePriorAnnotations = (annotation) => {
-    if (priorAnnotations.find((value) => value.index === annotation.index)) {
-      const updatedAnnotations = priorAnnotations.map((value) => {
-        if (value.index === annotation.index) {
-          return annotation;
-        } else {
-          return value;
-        }
-      });
-
-      setPriorAnnotations(updatedAnnotations);
+    if (annotation.index) {
+      setPriorAnnotations((priors) => [...priors, annotation]);
     } else {
       addToPriorAnnotations(annotation);
     }
+
+    // if (priorAnnotations.find((value) => value.index === annotation.index)) {
+    //   const updatedAnnotations = priorAnnotations.map((value) => {
+    //     if (value.index === annotation.index) {
+    //       return annotation;
+    //     } else {
+    //       return value;
+    //     }
+    //   });
+
+    //   setPriorAnnotations(updatedAnnotations);
+    // } else {
+    //   addToPriorAnnotations(annotation);
+    // }
   };
 
   const resetCurrentAnnotation = () => {

@@ -33,6 +33,7 @@ function Annotations() {
     context.setUpdatingAnnotation(true);
     item.modifiedAt = new Date();
     context.setCurrentAnnotation(item);
+    context.deleteFromPriorAnnotations(item);
   };
 
   const handleDelete = (item, event) => {

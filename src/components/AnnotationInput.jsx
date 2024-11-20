@@ -40,12 +40,29 @@ function AnnotationInput() {
       annotationHexes: context.currentHexes,
     };
 
+    console.log(updatedAnnotation);
+
     context.updatePriorAnnotations(updatedAnnotation);
     context.resetCurrentAnnotation();
     context.setUpdatingAnnotation(false);
   };
 
   const handleReset = (formValues) => {
+    const updatedAnnotation = {
+      ...context.currentNotes,
+      annotationHexes: context.currentHexes,
+    };
+
+    // console.log(context.currentNotes);
+    // console.log(formValues);
+    // console.log(context.currentHexes);
+
+    // console.log(updatedAnnotation);
+
+    if (context.updatingAnnotation) {
+      context.updatePriorAnnotations(updatedAnnotation);
+    }
+
     context.resetCurrentAnnotation();
     form.reset();
   };
