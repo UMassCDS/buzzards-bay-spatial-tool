@@ -3,7 +3,7 @@
 A tool used to collect spatial annotations in interviews.
 
 ## Installation
-Clone the repo: `git clone https://github.com/UMassCDS/buzzards-bay-spatial-tool.git`
+Open your terminal and clone the repo: `git clone https://github.com/UMassCDS/buzzards-bay-spatial-tool.git`, or download as a zip
 
 To get started you just have install node.js
 
