@@ -1,6 +1,4 @@
 import {
-  Menu,
-  Card,
   Text,
   ActionIcon,
   Button,
@@ -12,27 +10,28 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext";
 
 import "../styles/Annotations.css";
 
-const cssMap = {
-  "Area of Interest": "interest",
-  "Suggested Sensor Location": "suggestion",
-  "Comment on existing sensor location": "comment",
-};
-
 function Annotations() {
   const [opened, { toggle }] = useDisclosure(false);
   const context = useContext(AnnotationsContext);
 
   const handleCardClick = (item) => {
+    console.log("Clicked, updating: ", context.updatingAnnotation);
+    if (context.updatingAnnotation) {
+      alert("Please save or cancel current updating annotation.");
+      return;
+    }
+
     context.setUpdatingAnnotation(true);
     item.modifiedAt = new Date();
     context.setCurrentAnnotation(item);
+
     context.deleteFromPriorAnnotations(item);
   };
 
@@ -73,7 +72,10 @@ function Annotations() {
                 }}
               >
                 <div>
-                  <Text weight={500} className={cssMap[item["type"]]}>
+                  <Text
+                    weight={500}
+                    style={{ color: context.annotationTypes[item.type] }}
+                  >
                     {item.type}
                   </Text>
                   <Text size="sm">{item.notes}</Text>

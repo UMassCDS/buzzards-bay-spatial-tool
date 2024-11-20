@@ -1,14 +1,12 @@
 import { useForm } from "@mantine/form";
 import {
-  TextInput,
   Fieldset,
   NativeSelect,
   Textarea,
   Group,
-  Box,
-  Text,
   Button,
-  Flex,
+  TextInput,
+  Stack,
 } from "@mantine/core";
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import { useContext, useEffect } from "react";
@@ -19,9 +17,11 @@ function AnnotationInput() {
     mode: "controlled",
     initialValues: {
       type: context.currentNotes.type,
+      title: context.currentNotes.title,
       notes: context.currentNotes.notes,
     },
     validate: {
+      title: (value) => (value === "" ? "Please enter a title" : null),
       notes: (value) => (value === "" ? "Please enter notes" : null),
     },
   });
@@ -29,6 +29,7 @@ function AnnotationInput() {
   useEffect(() => {
     form.setValues({
       type: context.currentNotes.type,
+      title: context.currentNotes.title,
       notes: context.currentNotes.notes,
     });
   }, [context.currentNotes]);
@@ -40,8 +41,6 @@ function AnnotationInput() {
       annotationHexes: context.currentHexes,
     };
 
-    console.log(updatedAnnotation);
-
     context.updatePriorAnnotations(updatedAnnotation);
     context.resetCurrentAnnotation();
     context.setUpdatingAnnotation(false);
@@ -52,12 +51,6 @@ function AnnotationInput() {
       ...context.currentNotes,
       annotationHexes: context.currentHexes,
     };
-
-    // console.log(context.currentNotes);
-    // console.log(formValues);
-    // console.log(context.currentHexes);
-
-    // console.log(updatedAnnotation);
 
     if (context.updatingAnnotation) {
       context.updatePriorAnnotations(updatedAnnotation);
@@ -76,48 +69,53 @@ function AnnotationInput() {
             : "New Annotation"
         }
       >
-        <NativeSelect
-          {...form.getInputProps("type")}
-          withAsterisk
-          label="Select Annotation Type"
-          data={[
-            "Area of Interest",
-            "Suggested Sensor Location",
-            "Comment on existing sensor location",
-          ]}
-          onChange={(event) => {
-            form.setFieldValue("type", event.currentTarget.value);
-            // context.updateCurrentAnnotationType(event.currentTarget.value);
-            const updatedNotes = {
-              ...context.currentNotes,
-              ...form.values,
-              type: event.currentTarget.value,
-            };
+        <Stack gap="sm">
+          <NativeSelect
+            {...form.getInputProps("type")}
+            withAsterisk
+            label="Select Annotation Type"
+            data={Object.keys(context.annotationTypes)}
+            onChange={(event) => {
+              form.setFieldValue("type", event.currentTarget.value);
+              // context.updateCurrentAnnotationType(event.currentTarget.value);
+              const updatedNotes = {
+                ...context.currentNotes,
+                ...form.values,
+                type: event.currentTarget.value,
+              };
 
-            console.log(updatedNotes);
-            context.setCurrentNotes(updatedNotes);
-          }}
-        />
-        <Textarea
-          {...form.getInputProps("notes")}
-          label="Annotation Notes"
-          placeholder="Enter your comments about the selected region"
-        />
-        <Group mt="md">
-          <Button type="submit" variant="outline" color="green">
-            {context.updatingAnnotation
-              ? "Update Annotation"
-              : "Add Annotation"}
-          </Button>
-          <Button
-            type="button"
-            variant="light"
-            color="red"
-            onClick={handleReset}
-          >
-            {context.updatingAnnotation ? "Cancel Update" : "Clear Annotation"}
-          </Button>
-        </Group>
+              console.log(updatedNotes);
+              context.setCurrentNotes(updatedNotes);
+            }}
+          />
+          <TextInput
+            {...form.getInputProps("title")}
+            label="Annotation Title"
+            placeholder="Enter a title for your annotation"
+          />
+          <Textarea
+            {...form.getInputProps("notes")}
+            label="Annotation Notes"
+            placeholder="Enter your comments about the selected region"
+          />
+          <Group mt="md">
+            <Button type="submit" variant="outline" color="green">
+              {context.updatingAnnotation
+                ? "Update Annotation"
+                : "Add Annotation"}
+            </Button>
+            <Button
+              type="button"
+              variant="light"
+              color="red"
+              onClick={handleReset}
+            >
+              {context.updatingAnnotation
+                ? "Cancel Update"
+                : "Clear Annotation"}
+            </Button>
+          </Group>
+        </Stack>
       </Fieldset>
     </form>
   );

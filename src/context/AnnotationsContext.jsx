@@ -1,23 +1,35 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 
 const AnnotationsContext = createContext();
 
 const AnnotationsContextProvider = ({ children }) => {
+  const [annotationTypes, setAnnotationTypes] = useState({});
+
+  useEffect(() => {
+    const fetchAnnotationTypes = async () => {
+      try {
+        const response = await fetch("data/annotationtypes.json");
+        if (!response.ok) {
+          throw new Error(`Error loading types! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setAnnotationTypes(data);
+      } catch (error) {
+        console.error("Could not load annotation types:", error);
+      }
+    };
+
+    fetchAnnotationTypes();
+  }, []);
+
   const [priorAnnotations, setPriorAnnotations] = useState([]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [updatingAnnotation, setUpdatingAnnotation] = useState(false);
 
-  // const [currentAnnotation, setCurrentAnnotation] = useState({
-  //   type: "Area of Interest",
-  //   notes: "",
-  //   annotationHexes: [],
-  //   createdAt: new Date(),
-  //   modifiedAt: new Date(),
-  // });
-
   const [currentNotes, setCurrentNotes] = useState({
     type: "Area of Interest",
+    title: "",
     notes: "",
     createdAt: new Date(),
     modifiedAt: new Date(),
@@ -31,21 +43,13 @@ const AnnotationsContextProvider = ({ children }) => {
     setCurrentNotes({
       index: annotation["index"],
       type: annotation["type"],
+      title: annotation["title"],
       notes: annotation["notes"],
       createdAt: annotation["createdAt"],
       modifiedAt: annotation["modifiedAt"],
     });
     setCurrentHexes(annotation["annotationHexes"]);
   };
-
-  // const updateCurrentAnnotationHexagons = (hexIds) => {
-  //   const updatedAnnotation = {
-  //     ...currentAnnotation,
-  //     annotationHexes: hexIds,
-  //   };
-
-  //   setCurrentAnnotation(updatedAnnotation);
-  // };
 
   const addToPriorAnnotations = (annotation) => {
     annotation = {
@@ -62,26 +66,13 @@ const AnnotationsContextProvider = ({ children }) => {
     } else {
       addToPriorAnnotations(annotation);
     }
-
-    // if (priorAnnotations.find((value) => value.index === annotation.index)) {
-    //   const updatedAnnotations = priorAnnotations.map((value) => {
-    //     if (value.index === annotation.index) {
-    //       return annotation;
-    //     } else {
-    //       return value;
-    //     }
-    //   });
-
-    //   setPriorAnnotations(updatedAnnotations);
-    // } else {
-    //   addToPriorAnnotations(annotation);
-    // }
   };
 
   const resetCurrentAnnotation = () => {
     setUpdatingAnnotation(false);
     setCurrentNotes({
       type: "Area of Interest",
+      title: "",
       notes: "",
       createdAt: new Date(),
       modifiedAt: new Date(),
@@ -119,6 +110,7 @@ const AnnotationsContextProvider = ({ children }) => {
         currentHexes,
         updatingAnnotation,
         intervieweeId,
+        annotationTypes,
         setIntervieweeId,
         saveInterview,
         setCurrentNotes,

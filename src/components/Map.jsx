@@ -5,7 +5,6 @@ import {
   LayersControl,
   Polygon,
   FeatureGroup,
-  useMap,
   Popup,
   useMapEvents,
   Marker,
@@ -23,7 +22,7 @@ import { AnnotationsContext } from "../context/AnnotationsContext";
 
 window.type = true;
 
-const HEX_RESOLUTION = 9;
+const HEX_RESOLUTION = 10;
 const SENSOR_DATA_PATH = "../../data/example_sites/sites.json";
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
@@ -36,33 +35,6 @@ L.drawLocal.draw.handlers.polygon.tooltip.cont =
   "Continue drawing the shape for ADDING annotation hexagons";
 L.drawLocal.draw.handlers.polygon.tooltip.end =
   "Click the first point to finish drawing and fill the shape with hexagons";
-
-const getTypeColor = (type) => {
-  switch (type) {
-    case "Area of Interest":
-      return "#137ac2"; // blue
-    case "Suggested Sensor Location":
-      return "#84aa10"; // green
-    case "Comment on existing sensor location":
-      return "#c23b8a"; // pink
-    default:
-      return "#137ac2"; // blue
-  }
-};
-
-const h3IDsToGeoBoundary = ({ hexagonsIDs, type }) => {
-  if (!hexagonsIDs) {
-    return [];
-  }
-
-  const color = getTypeColor(type);
-
-  return hexagonsIDs.map((hexID) => ({
-    id: hexID,
-    boundary: h3.cellToBoundary(hexID, false).map(([lat, lng]) => [lat, lng]),
-    color: color,
-  }));
-};
 
 function SensorLayer() {
   const [markers, setMarkers] = useState([]);
@@ -143,7 +115,8 @@ function SelectionLayer({ hexagons }) {
       {hexagons.map((hex) => (
         <Polygon
           key={hex.id}
-          weight={10}
+          weight={4}
+          fillOpacity={0.2}
           positions={hex.boundary}
           pathOptions={{ color: hex.color, fillColor: hex.color }}
         />
@@ -175,6 +148,20 @@ function Map() {
 
   const [multiSelectHexagons, setMultiSelectHexagons] = useState([]);
   const [isAdd, setIsAdd] = useState(false);
+
+  const h3IDsToGeoBoundary = ({ hexagonsIDs, type }) => {
+    if (!hexagonsIDs) {
+      return [];
+    }
+
+    const color = context.annotationTypes[type];
+
+    return hexagonsIDs.map((hexID) => ({
+      id: hexID,
+      boundary: h3.cellToBoundary(hexID, false).map(([lat, lng]) => [lat, lng]),
+      color: color,
+    }));
+  };
 
   useEffect(() => {
     const currentHexIds = context.currentHexes;
@@ -274,7 +261,7 @@ function Map() {
             <SelectionLayer hexagons={hexagonsBoundaries} />
           </FeatureGroup>
         </LayersControl.Overlay>
-        <LayersControl.Overlay name="Prior Annotations">
+        <LayersControl.Overlay checked name="Prior Annotations">
           <FeatureGroup>
             <PriorAnnotationsLayer hexagons={priorAnnotations} />
           </FeatureGroup>
