@@ -40,6 +40,16 @@ function Annotations() {
     context.deleteFromPriorAnnotations(item);
   };
 
+  const sortByAnnotationType = (a, b) => {
+    if (a.type < b.type) {
+      return -1;
+    }
+    if (a.type > b.type) {
+      return 1;
+    }
+    return 0;
+  };
+
   return (
     <Box>
       <Group justify="center">
@@ -52,43 +62,45 @@ function Annotations() {
 
       <Collapse in={opened} p="sm">
         <Stack gap="sm">
-          {context.priorAnnotations.map((item, index) => (
-            <Paper
-              className="annotation_paper"
-              key={index}
-              withBorder
-              style={{
-                cursor: "pointer",
-              }}
-              shadow="xs"
-              p="sm"
-              onClick={() => handleCardClick(item)}
-            >
-              <div
+          {context.priorAnnotations
+            .sort(sortByAnnotationType)
+            .map((item, index) => (
+              <Paper
+                className="annotation_paper"
+                key={index}
+                withBorder
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  cursor: "pointer",
                 }}
+                shadow="xs"
+                p="sm"
+                onClick={() => handleCardClick(item)}
               >
-                <div>
-                  <Text
-                    weight={500}
-                    style={{ color: context.annotationTypes[item.type] }}
-                  >
-                    {item.type}
-                  </Text>
-                  <Text size="sm">{item.notes}</Text>
-                </div>
-                <ActionIcon
-                  color="red"
-                  onClick={(event) => handleDelete(item, event)}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  <FaRegTrashAlt size={16} />
-                </ActionIcon>
-              </div>
-            </Paper>
-          ))}
+                  <div>
+                    <Text
+                      weight={500}
+                      style={{ color: context.annotationTypes[item.type] }}
+                    >
+                      {item.type}
+                    </Text>
+                    <Text size="sm">{item.notes}</Text>
+                  </div>
+                  <ActionIcon
+                    color="red"
+                    onClick={(event) => handleDelete(item, event)}
+                  >
+                    <FaRegTrashAlt size={16} />
+                  </ActionIcon>
+                </div>
+              </Paper>
+            ))}
         </Stack>
       </Collapse>
     </Box>
