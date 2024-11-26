@@ -1,5 +1,5 @@
 import { useDisclosure } from "@mantine/hooks";
-import { Drawer, ActionIcon } from "@mantine/core";
+import { Drawer, ActionIcon, Stack, Text, Divider } from "@mantine/core";
 import { GiHarborDock } from "react-icons/gi";
 
 function Legend() {
@@ -7,27 +7,66 @@ function Legend() {
 
   return (
     <>
-      <Drawer opened={opened} onClose={close} title="How to use this app?">
-        <h2>Instructions</h2>
-        <p>
-          To start an interview, you have to provide an interviewee code,
-          defined by the researchers.
-        </p>
-        <p>
-          On the left side you have fields you can fill in. Annotation type
-          classifies your annotation. Annotation notes denote information you
-          want to share about the selected region. To select a region on the
-          map, you can click to place hexagons, and click again to remove a
-          hexagon. You can also multiselect a large region. On the top left of
-          the map, click on the hexagon symbol, this will allow you to place
-          points on a map to draw a polygon. The rectangle symbol draws a
-          rectangle and deletes hexagons in the covered region.
-        </p>
-        <h2>Manual</h2>
-        <p>To be filled out...</p>
-        <h2>Legend</h2>
-        <p>White markers represent low sensor value: 0</p>
-        <p>Red markers represent high sensor value: 1</p>
+      <Drawer
+        opened={opened}
+        onClose={close}
+        title="How to use this app?"
+        styles={{
+          drawer: {
+            backgroundColor: "#000000",
+            color: "#ffffff",
+          },
+          header: {
+            backgroundColor: "#000000",
+            color: "#ffffff",
+          },
+        }}
+        position="right"
+      >
+        <Stack gap="xs" className="text-white">
+          <h2 className="text-xl font-bold">Instructions</h2>
+          <p>
+            To begin an interview, enter the interviewee code provided by the
+            researchers.
+          </p>
+          <p>The left panel contains fields for entering information.</p>
+          <p>
+            <strong>Annotation type</strong>: Classify the annotation.
+          </p>
+          <p>
+            <strong>Annotation title</strong>: Short description of the
+            annotation and its region.
+          </p>
+          <p>
+            <strong>Annotation notes</strong>: Add details about the selected
+            region.
+          </p>
+          <p>To select a region on the map:</p>
+          <ul style={{ marginLeft: "20px" }}>
+            <li>Click individual hexagons to select/deselect them</li>
+            <li>Use multi-select mode to quickly highlight larger areas</li>
+            <li>
+              Click the hexagon icon in the top-left to draw custom polygons by
+              placing points on the map
+            </li>
+            <li>
+              Use the rectangle tool to erase multiple hexagons at once by
+              drawing a rectangle
+            </li>
+          </ul>
+          <Text bg="#222222" size="lg" p="md" style={{ borderRadius: "10px" }}>
+            <h2 className="text-xl font-bold" style={{ color: "white" }}>
+              Legend
+            </h2>
+            <Divider color="white" />
+            <p style={{ color: "white", fontWeight: "bold" }}>
+              White markers: Low sensor value (0)
+            </p>
+            <p style={{ color: "#ff4444", fontWeight: "bold" }}>
+              Red markers: High sensor value (1)
+            </p>
+          </Text>
+        </Stack>
       </Drawer>
       <ActionIcon onClick={open} variant="outline" color="cyan">
         <GiHarborDock size={30} />

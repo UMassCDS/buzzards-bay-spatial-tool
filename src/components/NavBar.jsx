@@ -4,6 +4,7 @@ import AnnotationInput from "./AnnotationInput.jsx";
 import { Button, Divider, Stack } from "@mantine/core";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext.jsx";
+import ListOfAnnotations from "./ListOfAnnotations.jsx";
 
 function NavBar({ code }) {
   const context = useContext(AnnotationsContext);
@@ -38,6 +39,8 @@ function NavBar({ code }) {
         >
           Submit Interview
         </Button>
+        <Divider />
+        <ListOfAnnotations />
       </Stack>
     </div>
   );

@@ -18,7 +18,7 @@ import { AnnotationsContext } from "../context/AnnotationsContext";
 import "../styles/Annotations.css";
 
 function Annotations() {
-  const [opened, { toggle }] = useDisclosure(false);
+  const [opened, { toggle }] = useDisclosure(true);
   const context = useContext(AnnotationsContext);
 
   const handleCardClick = (item) => {
@@ -54,8 +54,8 @@ function Annotations() {
     <Box>
       <Group justify="center">
         <Tooltip label="List your annotations from this interview session.">
-          <Button onClick={toggle} variant="outline" color="yellow">
-            Prior Annotations
+          <Button onClick={toggle} variant="outline" color="yellow" radius="md">
+            Prior Annotations | {opened ? "Hide" : "Show"}
           </Button>
         </Tooltip>
       </Group>
@@ -85,12 +85,14 @@ function Annotations() {
                 >
                   <div>
                     <Text
-                      weight={500}
+                      size="sm"
                       style={{ color: context.annotationTypes[item.type] }}
                     >
                       {item.type}
                     </Text>
-                    <Text size="sm">{item.notes}</Text>
+                    <Text size="md" fw={500}>
+                      {item.title}
+                    </Text>
                   </div>
                   <ActionIcon
                     color="red"
