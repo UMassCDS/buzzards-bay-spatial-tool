@@ -18,7 +18,7 @@ import "./App.css";
 
 import NavBar from "./components/NavBar";
 import MainContent from "./components/MainContent";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useField } from "@mantine/form";
 import { AnnotationsContext } from "./context/AnnotationsContext";
 import Legend from "./components/Legend";
@@ -27,6 +27,7 @@ function App() {
   const context = useContext(AnnotationsContext);
   const [navBarOpened, { toggle }] = useDisclosure();
   const [modalOpened, { open, close }] = useDisclosure(true);
+
   const validationFunction = (value) => {
     if (value === "") {
       return false;
@@ -52,7 +53,7 @@ function App() {
         padding="xs"
       >
         <Modal
-          opened={modalOpened}
+          opened={modalOpened && context.intervieweeId === ""}
           onClose={close}
           title="Login"
           closeOnClickOutside={false}
@@ -98,7 +99,7 @@ function App() {
             flexDirection: "column",
           }}
         >
-          <NavBar code={userCodeField.getValue()} />
+          <NavBar />
         </AppShell.Navbar>
         <AppShell.Main>
           <MainContent />

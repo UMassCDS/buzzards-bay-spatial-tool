@@ -5,22 +5,18 @@ const AnnotationsContext = createContext();
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState({});
 
-  useEffect(() => {
-    const fetchAnnotationTypes = async () => {
-      try {
-        const response = await fetch("data/annotationtypes.json");
-        if (!response.ok) {
-          throw new Error(`Error loading types! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setAnnotationTypes(data);
-      } catch (error) {
-        console.error("Could not load annotation types:", error);
+  const fetchAnnotationTypes = async () => {
+    try {
+      const response = await fetch("data/annotationtypes.json");
+      if (!response.ok) {
+        throw new Error(`Error loading types! status: ${response.status}`);
       }
-    };
-
-    fetchAnnotationTypes();
-  }, []);
+      const data = await response.json();
+      setAnnotationTypes(data);
+    } catch (error) {
+      console.error("Could not load annotation types:", error);
+    }
+  };
 
   const [priorAnnotations, setPriorAnnotations] = useState([]);
 
@@ -38,6 +34,7 @@ const AnnotationsContextProvider = ({ children }) => {
   const [intervieweeId, setIntervieweeId] = useState("");
 
   const [currentHexes, setCurrentHexes] = useState([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const setCurrentAnnotation = (annotation) => {
     setCurrentNotes({
@@ -102,6 +99,67 @@ const AnnotationsContextProvider = ({ children }) => {
     return interview;
   };
 
+  const saveStateToStorage = () => {
+    const state = {
+      priorAnnotations,
+      currentIndex,
+      currentNotes,
+      intervieweeId,
+      currentHexes,
+    };
+    localStorage.setItem("annotationsState", JSON.stringify(state));
+  };
+
+  const clearStateFromStorage = () => {
+    localStorage.removeItem("annotationsState");
+  };
+
+  useEffect(() => {
+    const loadStateFromStorage = async () => {
+      const savedState = localStorage.getItem("annotationsState");
+      if (savedState) {
+        const {
+          priorAnnotations,
+          currentIndex,
+          currentNotes,
+          intervieweeId,
+          currentHexes,
+        } = JSON.parse(savedState);
+
+        await fetchAnnotationTypes();
+
+        setPriorAnnotations(priorAnnotations || []);
+        setCurrentIndex(currentIndex || 0);
+        setCurrentNotes(
+          currentNotes || {
+            type: "Area of Interest",
+            title: "",
+            notes: "",
+            createdAt: new Date(),
+            modifiedAt: new Date(),
+          }
+        );
+        setIntervieweeId(intervieweeId || "");
+        setCurrentHexes(currentHexes || []);
+      }
+      setIsInitialized(true);
+    };
+
+    loadStateFromStorage();
+  }, []);
+
+  useEffect(() => {
+    if (isInitialized) {
+      saveStateToStorage();
+    }
+  }, [
+    priorAnnotations,
+    currentNotes,
+    currentIndex,
+    intervieweeId,
+    currentHexes,
+  ]);
+
   return (
     <AnnotationsContext.Provider
       value={{
@@ -113,6 +171,8 @@ const AnnotationsContextProvider = ({ children }) => {
         annotationTypes,
         setIntervieweeId,
         saveInterview,
+        saveStateToStorage,
+        clearStateFromStorage,
         setCurrentNotes,
         setCurrentHexes,
         updateCurrentAnnotationType,

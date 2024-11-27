@@ -178,13 +178,15 @@ function Map() {
 
   useEffect(() => {
     const hexs = context.priorAnnotations.flatMap((annotation) =>
-      h3IDsToGeoBoundary({
-        hexagonsIDs: annotation.annotationHexes,
-        type: annotation.type,
-      })
+      Object.keys(context.annotationTypes).length > 0
+        ? h3IDsToGeoBoundary({
+            hexagonsIDs: annotation.annotationHexes,
+            type: annotation.type,
+          })
+        : []
     );
     setPriorAnnotations(hexs);
-  }, [context.priorAnnotations]);
+  }, [context.priorAnnotations, context.annotationTypes]);
 
   const onAddSelectionHexagon = (hexagonID) => {
     const idx = selectedHexagons.indexOf(hexagonID);

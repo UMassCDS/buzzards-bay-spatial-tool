@@ -6,7 +6,7 @@ import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext.jsx";
 import ListOfAnnotations from "./ListOfAnnotations.jsx";
 
-function NavBar({ code }) {
+function NavBar() {
   const context = useContext(AnnotationsContext);
 
   const downloadFile = (content, filename) => {
@@ -22,7 +22,7 @@ function NavBar({ code }) {
   return (
     <div style={{ flexGrow: 1, overflow: "auto" }}>
       <Stack gap="md">
-        <UserInformation code={code} />
+        <UserInformation />
         <Divider />
         <Annotations />
         <Divider />
