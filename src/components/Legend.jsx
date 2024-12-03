@@ -1,9 +1,19 @@
+import { useContext } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Drawer, ActionIcon, Stack, Text, Divider } from "@mantine/core";
+import {
+  Drawer,
+  ActionIcon,
+  Stack,
+  Text,
+  Divider,
+  Button,
+} from "@mantine/core";
 import { GiHarborDock } from "react-icons/gi";
+import { AnnotationsContext } from "../context/AnnotationsContext";
 
 function Legend() {
   const [opened, { open, close }] = useDisclosure(false);
+  const context = useContext(AnnotationsContext);
 
   return (
     <>
@@ -66,6 +76,19 @@ function Legend() {
               Red markers: High sensor value (1)
             </p>
           </Text>
+          <Divider my="md" color="black" />
+          <Text>
+            If there is an error with the application, or you want to start the
+            interview from the beginning. Warning, this action cannot be
+            reversed!
+          </Text>
+          <Button
+            onClick={context.resetInterview}
+            variant="outline"
+            color="red"
+          >
+            Clear current interview
+          </Button>
         </Stack>
       </Drawer>
       <ActionIcon onClick={open} variant="outline" color="cyan">

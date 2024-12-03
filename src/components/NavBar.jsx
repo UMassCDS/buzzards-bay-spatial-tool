@@ -31,10 +31,16 @@ function NavBar() {
         <Button
           variant="filled"
           color="lime"
-          onClick={() => {
-            const interview = context.saveInterview();
-            const jsonContent = JSON.stringify(interview, null, 2);
-            downloadFile(jsonContent, "interview.json");
+          onClick={async () => {
+            console.log("Saving interview - Button clicked");
+            const response = await context.saveInterview();
+            console.log(response);
+            alert(response.message);
+            if (response.success) {
+              context.resetInterview();
+            }
+            // const jsonContent = JSON.stringify(response.interview, null, 2);
+            // downloadFile(jsonContent, "interview.json");
           }}
         >
           Submit Interview

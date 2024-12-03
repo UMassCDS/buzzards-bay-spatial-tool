@@ -91,12 +91,42 @@ const AnnotationsContextProvider = ({ children }) => {
     );
   };
 
-  const saveInterview = () => {
+  const saveInterview = async () => {
     const interview = {};
     interview.intervieweeId = intervieweeId;
     interview.annotations = priorAnnotations;
-
-    return interview;
+    console.log(interview);
+    try {
+      console.log("Saving interview");
+      console.log(
+        `http://localhost:${import.meta.env.VITE_BACKEND_PORT}/api/save`
+      );
+      const response = await fetch(
+        `http://localhost:${import.meta.env.VITE_BACKEND_PORT}/api/save`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(interview),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error saving interview! status: ${response.status}`);
+      }
+      // setPriorAnnotations([]);
+      // setCurrentIndex(0);
+      // resetCurrentAnnotation();
+      // clearStateFromStorage();
+      return {
+        success: true,
+        message: "Interview saved successfully",
+        interview,
+      };
+    } catch (error) {
+      console.error("Error saving interview", error);
+      return { success: false, message: "Error saving interview", interview };
+    }
   };
 
   const saveStateToStorage = () => {
@@ -160,6 +190,15 @@ const AnnotationsContextProvider = ({ children }) => {
     currentHexes,
   ]);
 
+  const resetInterview = () => {
+    setPriorAnnotations([]);
+    setCurrentIndex(0);
+    resetCurrentAnnotation();
+    clearStateFromStorage();
+    setIntervieweeId("");
+    window.location.reload();
+  };
+
   return (
     <AnnotationsContext.Provider
       value={{
@@ -169,6 +208,7 @@ const AnnotationsContextProvider = ({ children }) => {
         updatingAnnotation,
         intervieweeId,
         annotationTypes,
+        resetInterview,
         setIntervieweeId,
         saveInterview,
         saveStateToStorage,
