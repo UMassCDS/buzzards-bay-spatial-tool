@@ -39,8 +39,8 @@ function NavBar() {
             if (response.success) {
               context.resetInterview();
             }
-            // const jsonContent = JSON.stringify(response.interview, null, 2);
-            // downloadFile(jsonContent, "interview.json");
+            const jsonContent = JSON.stringify(response.interview, null, 2);
+            downloadFile(jsonContent, "interview.json");
           }}
         >
           Submit Interview
