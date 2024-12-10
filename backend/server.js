@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", async (req, res) => {
+  res.status(200).json({ message: "Server is running" });
+});
+
 app.post("/api/save", async (req, res) => {
   const interview = req.body;
   console.log(interview);
@@ -67,16 +71,32 @@ app.post("/api/save", async (req, res) => {
       console.log("Annotation inserted, ID:", annotationId);
 
       if (annotation.annotationHexes?.length > 0) {
-        const hexValues = annotation.annotationHexes
-          .map((hex) => `(${annotationId}, '${hex}')`)
-          .join(",");
+        const batchSize = 1000; // SQL server limit
+        for (let i = 0; i < annotation.annotationHexes.length; i += batchSize) {
+          const batchHexes = annotation.annotationHexes.slice(i, i + batchSize);
+          const hexValues = batchHexes
+            .map((hex) => `(${annotationId}, '${hex}')`)
+            .join(",");
 
-        await request.query(
-          `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES ${hexValues}`
-        );
+          await request.query(
+            `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES ${hexValues}`
+          );
 
-        console.log("Hexagons inserted");
+          console.log("Hexagons batch inserted");
+        }
       }
+
+      // if (annotation.annotationHexes?.length > 0) {
+      //   const hexValues = annotation.annotationHexes
+      //     .map((hex) => `(${annotationId}, '${hex}')`)
+      //     .join(",");
+
+      //   await request.query(
+      //     `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES ${hexValues}`
+      //   );
+
+      //   console.log("Hexagons inserted");
+      // }
 
       // for (const [index, h3Id] of (
       //   annotation.annotationHexes || []
@@ -123,6 +143,6 @@ initializeDatabase()
   });
 
 const port = process.env.VITE_BACKEND_PORT || 3000;
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });

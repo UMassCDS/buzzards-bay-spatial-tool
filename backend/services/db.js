@@ -11,6 +11,7 @@ const config = {
     encrypt: true,
     enableArithAbort: true,
   },
+  requestTimeout: 30000,
 };
 
 export async function initializeDatabase() {

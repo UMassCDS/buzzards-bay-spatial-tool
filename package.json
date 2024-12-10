@@ -9,7 +9,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "concurrently \"npm run start:backend\" \"npm run dev\""
+    "startdev": "concurrently \"npm run start:backend\" \"npm run dev\"",
+    "start": "concurrently \"npm run start:backend\" \"npm run preview\""
   },
   "dependencies": {
     "@mantine/core": "^7.13.4",
