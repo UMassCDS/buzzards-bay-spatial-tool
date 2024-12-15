@@ -2,16 +2,23 @@ import { createContext, useState, useEffect } from "react";
 
 const AnnotationsContext = createContext();
 
+const TYPES = {
+  "Area of Interest": "#137ac2",
+  "Suggested Sensor Location": "#84aa10",
+  "Comment on existing sensor location": "#c23b8a",
+};
+
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState({});
 
   const fetchAnnotationTypes = async () => {
     try {
-      const response = await fetch("data/annotationtypes.json");
-      if (!response.ok) {
-        throw new Error(`Error loading types! status: ${response.status}`);
-      }
-      const data = await response.json();
+      // const response = await fetch("data/annotationtypes.json");
+      // if (!response.ok) {
+      //   throw new Error(`Error loading types! status: ${response.status}`);
+      // }
+      // const data = await response.json();
+      const data = TYPES; // After Vite build, it could not fetch the JSON file, using this shortcut for now
       setAnnotationTypes(data);
     } catch (error) {
       console.error("Could not load annotation types:", error);
