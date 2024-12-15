@@ -1,6 +1,6 @@
-# Buzzards Bay Spatial Tool - Frontend
+# Buzzards Bay Spatial Tool - Backend Service
 
-A tool used to collect spatial annotations in interviews. This portion is for the frontend interface.
+A tool used to collect spatial annotations in interviews. This portion deals with communicating with database and saving annotations.
 
 ## Installation
 To get started you just have install node.js
@@ -19,7 +19,6 @@ That is all!
 
 ## How to run
 
-1. Navigate to frontend
-2. `npm run dev`
-3. It will tell you it is running on `localhost:5173`
-4. Navigate to that url on your browser and start using. Instructions about the application is found inside the application by clicking on the dock icon.
+1. Navigate to backend directory
+2. `npm run start`
+3. Server is running on `localhost:5174`
