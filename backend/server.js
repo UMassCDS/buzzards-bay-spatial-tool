@@ -4,6 +4,8 @@ import { connectToDatabase, initializeDatabase } from "./services/db.js";
 import sql from "mssql";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import { promises } from "fs";
+import path from "path";
 dotenv.config();
 
 const app = express();
@@ -133,6 +135,18 @@ app.post("/api/save", async (req, res) => {
     });
     console.error(error);
     res.status(500).json({ message: "Error saving interview" });
+  }
+});
+
+app.get("/data/annotation_types", async (req, res) => {
+  try {
+    const filePath = "./data/annotationtypes.json";
+    const data = await promises.readFile(filePath, "utf-8");
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (error) {
+    console.log("Error reading types: ", error);
+    res.status(500).json({ error: "Failed fetching types" });
   }
 });
 

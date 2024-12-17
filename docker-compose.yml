@@ -1,0 +1,19 @@
+services:
+  backend:
+    platform: linux/amd64
+    image: umasscds/bb_backend:v1.0.0
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5174:5174"
+  
+  frontend:
+    platform: linux/amd64
+    image: umasscds/bb_frontend:v1.0.0
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      

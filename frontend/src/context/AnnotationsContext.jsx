@@ -2,12 +2,13 @@ import { createContext, useState, useEffect } from "react";
 
 const AnnotationsContext = createContext();
 
-const TYPES = {
-  "Area of Interest": "#137ac2",
-  "Suggested Sensor Location": "#84aa10",
-  "Comment on existing sensor location": "#c23b8a",
-};
+// const TYPES = {
+//   "Area of Interest": "#137ac2",
+//   "Suggested Sensor Location": "#84aa10",
+//   "Comment on existing sensor location": "#c23b8a",
+// };
 
+// eslint-disable-next-line react/prop-types
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState({});
 
@@ -18,7 +19,20 @@ const AnnotationsContextProvider = ({ children }) => {
       //   throw new Error(`Error loading types! status: ${response.status}`);
       // }
       // const data = await response.json();
-      const data = TYPES; // After Vite build, it could not fetch the JSON file, using this shortcut for now
+      // const data = TYPES; // After Vite build, it could not fetch the JSON file, using this shortcut for now
+      const response = await fetch(
+        `http://localhost:${
+          import.meta.env.VITE_BACKEND_PORT
+        }/data/annotation_types`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
       setAnnotationTypes(data);
     } catch (error) {
       console.error("Could not load annotation types:", error);
