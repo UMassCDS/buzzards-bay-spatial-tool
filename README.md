@@ -26,3 +26,10 @@ Run `npm i` in both frontend and backend directories.
 3. `npm run dev`
 4. It will tell you it is running on `localhost:5173`
 5. Navigate to that url on your browser and start using. Instructions about the application is found inside the application by clicking on the dock icon.
+
+## How to run with docker
+1. Install Docker desktop by downloading the installer from their site
+2. navigate to root of this project
+3. Run `docker compose build`
+4. Run `docker compose up`
+5. Navigate to `localhost`

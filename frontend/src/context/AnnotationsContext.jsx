@@ -21,9 +21,7 @@ const AnnotationsContextProvider = ({ children }) => {
       // const data = await response.json();
       // const data = TYPES; // After Vite build, it could not fetch the JSON file, using this shortcut for now
       const response = await fetch(
-        `http://localhost:${
-          import.meta.env.VITE_BACKEND_PORT
-        }/data/annotation_types`,
+        `${import.meta.env.VITE_BACKEND_IP}/data/annotation_types`,
         {
           method: "GET",
           headers: {
@@ -119,11 +117,9 @@ const AnnotationsContextProvider = ({ children }) => {
     console.log(interview);
     try {
       console.log("Saving interview");
-      console.log(
-        `http://localhost:${import.meta.env.VITE_BACKEND_PORT}/api/save`
-      );
+      console.log(`${import.meta.env.VITE_BACKEND_IP}/api/save`);
       const response = await fetch(
-        `http://localhost:${import.meta.env.VITE_BACKEND_PORT}/api/save`,
+        `${import.meta.env.VITE_BACKEND_IP}/api/save`,
         {
           method: "POST",
           headers: {

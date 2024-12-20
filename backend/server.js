@@ -150,6 +150,18 @@ app.get("/data/annotation_types", async (req, res) => {
   }
 });
 
+app.get("/data/sensor_sites", async (req, res) => {
+  try {
+    const filePath = "./data/example_sites/sites.json";
+    const data = await promises.readFile(filePath, "utf-8");
+    const jsonData = JSON.parse(data);
+    res.json(jsonData);
+  } catch (error) {
+    console.log("Error reading sensor sites: ", error);
+    res.status(500).json({ error: "Failed fetching types" });
+  }
+});
+
 initializeDatabase()
   .then(() => {
     console.log("Database initialization complete");

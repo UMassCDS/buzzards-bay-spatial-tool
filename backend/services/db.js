@@ -58,12 +58,29 @@ export async function initializeDatabase() {
   }
 }
 
-export async function connectToDatabase() {
-  try {
-    const pool = await sql.connect(config);
-    console.log("Connected to database");
-    return pool;
-  } catch (error) {
-    console.error("Error connecting to database", error);
+export async function connectToDatabase(maxRetries = 5, retryDelay = 5000) {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const pool = await sql.connect(config);
+      console.log("Connected to database");
+      return pool;
+    } catch (error) {
+      attempt++;
+      console.error(
+        `Database connection failed (attempt ${attempt} of ${maxRetries}):`,
+        error
+      );
+
+      if (attempt >= maxRetries) {
+        console.error(
+          "Maximum retry attempts reached. Unable to connect to the database."
+        );
+        throw error;
+      }
+
+      console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+    }
   }
 }

@@ -42,7 +42,18 @@ function SensorLayer() {
   useEffect(() => {
     async function fetchSensorMarkers() {
       try {
-        const response = await fetch(SENSOR_DATA_PATH);
+        // const response = await fetch(SENSOR_DATA_PATH);
+        // const sites = await response.json();
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
         const sites = await response.json();
         const siteMarkers = sites.map((site) => {
           const popupText =
