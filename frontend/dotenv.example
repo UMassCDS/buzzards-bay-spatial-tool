@@ -1,0 +1,10 @@
+# This is an example of the .env file. It is not used in the project, but is provided as a reference.
+# Comment out the local or production options you are not using.
+
+# Local Development options
+# VITE_BACKEND_PORT=5174
+# VITE_FRONTEND_PORT=5173
+# VITE_BACKEND_IP=http://0.0.0.0:5174
+
+# Production backend IP
+VITE_BACKEND_IP=SOME_AZURE_APP_SERVICE_URL
