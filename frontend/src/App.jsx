@@ -41,11 +41,6 @@ function App() {
     validate: (value) => (validationFunction(value) ? "Code not valid" : null),
   });
 
-  console.log(`Backend: ${import.meta.env.VITE_BACKEND_IP}`);
-  fetch(`${import.meta.env.VITE_BACKEND_IP}`).then((response) =>
-    console.log("Connection: ", response.status)
-  );
-
   return (
     <MantineProvider>
       <AppShell

@@ -33,3 +33,18 @@ Run `npm i` in both frontend and backend directories.
 3. Run `docker compose build`
 4. Run `docker compose up`
 5. Navigate to `localhost`
+
+## How to deploy, generically
+1. Install Docker desktop
+2. Run `docker compose build`
+3. Create your account with a Cloud service provider, like Azure
+Next steps might vary based on your service provider, but here are some general steps, Azure compliant:
+4. Create a container registry
+5. Tag and upload your image to the registry
+6. Create application service plan
+7. Create two application services, one for the frontend and one for the backend
+8. While creating services, set the input to use the image from the registry
+
+Note: You probably have to update the .env to point to the correct backend url. To redeploy, you have to update the image in the registry and restart the services.
+
+This was a very high level overview of the process, and you should refer to the documentation of your service provider for more detailed instructions, for bb interview tool refer to provided documentation on drive.

@@ -162,6 +162,19 @@ app.get("/data/sensor_sites", async (req, res) => {
   }
 });
 
+const checkDatabaseConnection = async () => {
+  try {
+    console.log("Checking database connection...");
+    const pool = await connectToDatabase();
+    await pool.query`SELECT 1`;
+    console.log("Database connection is healthy");
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+  }
+};
+
+setInterval(checkDatabaseConnection, 60000);
+
 initializeDatabase()
   .then(() => {
     console.log("Database initialization complete");

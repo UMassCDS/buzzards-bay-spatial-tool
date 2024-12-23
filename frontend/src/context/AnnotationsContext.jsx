@@ -2,40 +2,46 @@ import { createContext, useState, useEffect } from "react";
 
 const AnnotationsContext = createContext();
 
-// const TYPES = {
-//   "Area of Interest": "#137ac2",
-//   "Suggested Sensor Location": "#84aa10",
-//   "Comment on existing sensor location": "#c23b8a",
-// };
+const TYPES = {
+  "Area of Interest": "#137ac2",
+  "Suggested Sensor Location": "#84aa10",
+  "Comment on existing sensor location": "#c23b8a",
+};
 
 // eslint-disable-next-line react/prop-types
 const AnnotationsContextProvider = ({ children }) => {
-  const [annotationTypes, setAnnotationTypes] = useState({});
+  const [annotationTypes, setAnnotationTypes] = useState(TYPES);
+  // const [isLoadingAnnotationTypes, setIsLoadingAnnotationTypes] =
+  //   useState(true);
 
-  const fetchAnnotationTypes = async () => {
-    try {
-      // const response = await fetch("data/annotationtypes.json");
-      // if (!response.ok) {
-      //   throw new Error(`Error loading types! status: ${response.status}`);
-      // }
-      // const data = await response.json();
-      // const data = TYPES; // After Vite build, it could not fetch the JSON file, using this shortcut for now
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_IP}/data/annotation_types`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-      setAnnotationTypes(data);
-    } catch (error) {
-      console.error("Could not load annotation types:", error);
-    }
-  };
+  // const fetchAnnotationTypes = async () => {
+  //   setIsLoadingAnnotationTypes(true);
+  //   try {
+  //     // const response = await fetch("data/annotationtypes.json");
+  //     // if (!response.ok) {
+  //     //   throw new Error(`Error loading types! status: ${response.status}`);
+  //     // }
+  //     // const data = await response.json();
+  //     const data = TYPES; // After Vite build, it could not fetch the JSON file, using this shortcut for now
+  //     // console.log("Attempt fetching annotation types.");
+  //     // const response = await fetch(
+  //     //   `${import.meta.env.VITE_BACKEND_IP}/data/annotation_types`,
+  //     //   {
+  //     //     method: "GET",
+  //     //     headers: {
+  //     //       "Content-Type": "application/json",
+  //     //     },
+  //     //   }
+  //     // );
+  //     // const data = await response.json();
+  //     setAnnotationTypes(data);
+  //     console.log("Fetched types: ", data);
+  //   } catch (error) {
+  //     console.error("Could not load annotation types:", error);
+  //   } finally {
+  //     setIsLoadingAnnotationTypes(false);
+  //   }
+  // };
 
   const [priorAnnotations, setPriorAnnotations] = useState([]);
 
@@ -162,6 +168,11 @@ const AnnotationsContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    console.log(`Backend: ${import.meta.env.VITE_BACKEND_IP}`);
+    fetch(`${import.meta.env.VITE_BACKEND_IP}`).then((response) =>
+      console.log("Connection: ", response.status)
+    );
+
     const loadStateFromStorage = async () => {
       const savedState = localStorage.getItem("annotationsState");
       if (savedState) {
@@ -173,7 +184,7 @@ const AnnotationsContextProvider = ({ children }) => {
           currentHexes,
         } = JSON.parse(savedState);
 
-        await fetchAnnotationTypes();
+        // await fetchAnnotationTypes();
 
         setPriorAnnotations(priorAnnotations || []);
         setCurrentIndex(currentIndex || 0);
@@ -225,6 +236,7 @@ const AnnotationsContextProvider = ({ children }) => {
         updatingAnnotation,
         intervieweeId,
         annotationTypes,
+        // isLoadingAnnotationTypes,
         resetInterview,
         setIntervieweeId,
         saveInterview,

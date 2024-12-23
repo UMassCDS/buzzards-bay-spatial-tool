@@ -44,6 +44,7 @@ function SensorLayer() {
       try {
         // const response = await fetch(SENSOR_DATA_PATH);
         // const sites = await response.json();
+        console.log("Fetching sensor data.");
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
           {
@@ -55,6 +56,7 @@ function SensorLayer() {
         );
 
         const sites = await response.json();
+        console.log("Fetched sensors: ", sites);
         const siteMarkers = sites.map((site) => {
           const popupText =
             `SITE: ${site["site"]}\n` +
