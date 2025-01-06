@@ -1,0 +1,35 @@
+name: Push Images to Azure Container Registry
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push-to-acr:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Azure Container Registry
+      run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.ACR_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+    - name: Build Docker images
+      run: docker compose build
+
+    - name: Tag Docker images
+      run: |
+        docker tag umasscds/bb_frontend ${{ secrets.ACR_SERVER }}/bb_frontend
+        docker tag umasscds/bb_backend ${{ secrets.ACR_SERVER }}/bb_backend
+
+    - name: Push Docker images to ACR
+      run: |
+        docker push ${{ secrets.ACR_SERVER }}/bb_frontend
+        docker push ${{ secrets.ACR_SERVER }}/bb_backend
+
+    - name: Verify pushed images
+      run: |
+        echo "Frontend image: ${{ secrets.ACR_SERVER }}/bb_frontend"
+        echo "Backend image: ${{ secrets.ACR_SERVER }}/bb_backend"
