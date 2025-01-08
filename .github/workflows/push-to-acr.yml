@@ -25,9 +25,9 @@ jobs:
                              --build-arg DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
                              --build-arg VITE_BACKEND_PORT=${{ secrets.VITE_BACKEND_PORT }} \
                              --build-arg VITE_FRONTEND_PORT=${{ secrets.VITE_FRONTEND_PORT }} \
-                             -t umasscds/bb_backend ./backend
+                             backend
           docker compose build --build-arg VITE_BACKEND_IP=${{ secrets.VITE_BACKEND_IP }} \
-                             -t umasscds/bb_frontend ./frontend
+                             frontend
 
       - name: Tag Docker images
         run: |
