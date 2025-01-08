@@ -1,35 +1,42 @@
 name: Push Images to Azure Container Registry
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch
 
 jobs:
   push-to-acr:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      -name: Checkout code
+       uses: actions/checkout@v3
 
-    - name: Log in to Azure Container Registry
-      run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.ACR_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+      -name: Log in to Azure Container Registry
+       uses: azure/docker-login@v2
+       with:
+         login-server: ${{ secrets.ACR_SERVER }}
+         username: ${{ secrets.ACR_USERNAME }}
+         password: ${{ secrets.ACR_PASSWORD }}
+      
+      - name: Build Docker images
+        run: |
+          docker compose build --build-arg ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }} \
+                               --build-arg ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+                               --build-arg SERVER_NAME=${{ secrets.SERVER_NAME }} \
+                               --build-arg DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
+                               --build-arg VITE_BACKEND_PORT=${{ secrets.VITE_BACKEND_PORT }} \
+                               --build-arg VITE_FRONTEND_PORT=${{ secrets.VITE_FRONTEND_PORT }} \
+                               -t umasscds/bb_backend ./backend
+          docker compose build --build-arg VITE_BACKEND_IP=${{ secrets.VITE_BACKEND_IP }} \
+                               -t umasscds/bb_frontend ./frontend
 
-    - name: Build Docker images
-      run: docker compose build
+      - name: Tag Docker images
+        run: |
+          docker tag umasscds/bb_frontend ${{ secrets.ACR_SERVER }}/bb_frontend
+          docker tag umasscds/bb_backend ${{ secrets.ACR_SERVER }}/bb_backend
 
-    - name: Tag Docker images
-      run: |
-        docker tag umasscds/bb_frontend ${{ secrets.ACR_SERVER }}/bb_frontend
-        docker tag umasscds/bb_backend ${{ secrets.ACR_SERVER }}/bb_backend
-
-    - name: Push Docker images to ACR
-      run: |
-        docker push ${{ secrets.ACR_SERVER }}/bb_frontend
-        docker push ${{ secrets.ACR_SERVER }}/bb_backend
-
-    - name: Verify pushed images
-      run: |
-        echo "Frontend image: ${{ secrets.ACR_SERVER }}/bb_frontend"
-        echo "Backend image: ${{ secrets.ACR_SERVER }}/bb_backend"
+      - name: Push Docker images to ACR
+      - name: Push Docker images to ACR
+        run: |
+          docker push ${{ secrets.ACR_SERVER }}/bb_frontend
+          docker push ${{ secrets.ACR_SERVER }}/bb_backend
