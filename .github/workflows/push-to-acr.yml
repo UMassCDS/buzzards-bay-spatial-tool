@@ -1,7 +1,6 @@
 name: Push Images to Azure Container Registry
 
-on:
-  workflow_dispatch
+on: workflow_dispatch
 
 jobs:
   push-to-acr:
