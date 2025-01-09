@@ -17,17 +17,21 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       
-      - name: Build Docker images
+      - name: Create .env file for frontend
         run: |
-          docker compose build --build-arg ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }} \
-                             --build-arg ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
-                             --build-arg SERVER_NAME=${{ secrets.SERVER_NAME }} \
-                             --build-arg DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
-                             --build-arg VITE_BACKEND_PORT=${{ secrets.VITE_BACKEND_PORT }} \
-                             --build-arg VITE_FRONTEND_PORT=${{ secrets.VITE_FRONTEND_PORT }} \
-                             backend
-          docker compose build --build-arg VITE_BACKEND_IP=${{ secrets.VITE_BACKEND_IP }} \
-                             frontend
+          echo "VITE_BACKEND_IP=${{ secrets.VITE_BACKEND_IP }}" > frontend/.env
+      
+      - name: Create .env file for backend
+        run: |
+          echo "ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}" > backend/.env
+          echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> backend/.env
+          echo "SERVER_NAME=${{ secrets.SERVER_NAME }}" >> backend/.env
+          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> backend/.env
+          echo "VITE_BACKEND_PORT=${{ secrets.VITE_BACKEND_PORT }}" >> backend/.env
+          echo "VITE_FRONTEND_PORT=${{ secrets.VITE_FRONTEND_PORT }}" >> backend/.env
+      
+      - name: Build Docker images
+        run: docker compose build
 
       - name: Tag Docker images
         run: |
