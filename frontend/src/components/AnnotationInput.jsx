@@ -41,6 +41,11 @@ function AnnotationInput() {
       annotationHexes: context.currentHexes,
     };
 
+    if (context.currentHexes.length === 0) {
+      alert("Please select a region first, at least one hex is required.");
+      return;
+    }
+
     context.updatePriorAnnotations(updatedAnnotation);
     context.resetCurrentAnnotation();
     context.setUpdatingAnnotation(false);
