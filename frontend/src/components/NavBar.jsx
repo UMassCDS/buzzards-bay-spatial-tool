@@ -5,6 +5,7 @@ import { Button, Divider, Stack } from "@mantine/core";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext.jsx";
 import ListOfAnnotations from "./ListOfAnnotations.jsx";
+import MapLegend from "./MapLegend.jsx";
 
 function NavBar() {
   const context = useContext(AnnotationsContext);
@@ -23,6 +24,8 @@ function NavBar() {
     <div style={{ flexGrow: 1, overflow: "auto" }}>
       <Stack gap="md">
         <UserInformation />
+        <Divider />
+        <MapLegend />
         <Divider />
         <Annotations />
         <Divider />

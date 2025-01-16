@@ -64,18 +64,6 @@ function Legend() {
               drawing a rectangle
             </li>
           </ul>
-          <Text bg="#222222" size="lg" p="md" style={{ borderRadius: "10px" }}>
-            <h2 className="text-xl font-bold" style={{ color: "white" }}>
-              Legend
-            </h2>
-            <Divider color="white" />
-            <p style={{ color: "white", fontWeight: "bold" }}>
-              White markers: Low sensor value (0)
-            </p>
-            <p style={{ color: "#ff4444", fontWeight: "bold" }}>
-              Red markers: High sensor value (1)
-            </p>
-          </Text>
           <Divider my="md" color="black" />
           <Text>
             If there is an error with the application, or you want to start the
