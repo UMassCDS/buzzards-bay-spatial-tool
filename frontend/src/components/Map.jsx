@@ -42,8 +42,6 @@ function SensorLayer() {
   useEffect(() => {
     async function fetchSensorMarkers() {
       try {
-        // const response = await fetch(SENSOR_DATA_PATH);
-        // const sites = await response.json();
         console.log("Fetching sensor data.");
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
