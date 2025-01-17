@@ -20,17 +20,21 @@ function MapLegend() {
             Legend
           </h2>
           <Divider color="white" />
-          <p style={{ color: "gray", fontWeight: "bold" }}>
+          <p style={{ color: "gray", fontWeight: "bold", fontSize: "16px" }}>
             Sensor colors, interpretation of sensor values.
           </p>
-          <p style={{ color: "white" }}>White markers: Low sensor value (0)</p>
-          <p style={{ color: "#ff4444" }}>Red markers: High sensor value (1)</p>
+          <p style={{ color: "white", fontSize: "16px" }}>
+            Whiter markers: Lower sensor value, close to 0
+          </p>
+          <p style={{ color: "#ff4444", fontSize: "16px" }}>
+            Redder markers: Higher sensor value, close to 1
+          </p>
           <Divider color="white" />
-          <p style={{ color: "gray", fontWeight: "bold" }}>
+          <p style={{ color: "gray", fontWeight: "bold", fontSize: "16px" }}>
             Hexagon colors, interpretation of hexagon types.
           </p>
           {Object.entries(TYPES).map(([type, color]) => (
-            <p style={{ color: color }} key={type}>
+            <p style={{ color: color, fontSize: "16px" }} key={type}>
               {type}
             </p>
           ))}

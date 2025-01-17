@@ -36,7 +36,69 @@ L.drawLocal.draw.handlers.polygon.tooltip.cont =
 L.drawLocal.draw.handlers.polygon.tooltip.end =
   "Click the first point to finish drawing and fill the shape with hexagons";
 
-function SensorLayer() {
+function SensorLayerNoValues() {
+  const [markers, setMarkers] = useState([]);
+
+  useEffect(() => {
+    async function fetchSensorMarkers() {
+      try {
+        console.log("Fetching sensor data.");
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const sites = await response.json();
+        console.log("Fetched sensors, for no value: ", sites);
+        const siteMarkers = sites.map((site) => {
+          const popupText =
+            `SITE: ${site["site"]}\n` +
+            `Description: ${site["description"]}\n` +
+            `Tide Station: ${site["tide_station"]}`;
+
+          const color = "purple";
+          const customIcon = L.divIcon({
+            className: "custom-div-icon",
+            html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
+          });
+
+          return L.marker([site["latitude"], site["longitude"]], {
+            icon: customIcon,
+          }).bindPopup(popupText);
+        });
+        setMarkers(siteMarkers);
+      } catch (error) {
+        console.error("Error fetching sensor markers:", error);
+      }
+    }
+
+    fetchSensorMarkers();
+  }, []);
+
+  return (
+    <FeatureGroup>
+      {markers.map((marker, index) => (
+        <Marker
+          key={index}
+          position={marker.getLatLng()}
+          icon={marker.options.icon}
+        >
+          <Popup>{marker.getPopup().getContent()}</Popup>
+        </Marker>
+      ))}
+    </FeatureGroup>
+  );
+}
+
+function SensorLayerWithValues() {
   const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
@@ -279,8 +341,11 @@ function Map() {
             <PriorAnnotationsLayer hexagons={priorAnnotations} />
           </FeatureGroup>
         </LayersControl.Overlay>
-        <LayersControl.Overlay name="Sensors Overlay">
-          <SensorLayer />
+        <LayersControl.Overlay name="Sensor Locations - No Values">
+          <SensorLayerNoValues />
+        </LayersControl.Overlay>
+        <LayersControl.Overlay name="Sensor Locations - With Values ">
+          <SensorLayerWithValues />
         </LayersControl.Overlay>
       </LayersControl>
       <FeatureGroup>
