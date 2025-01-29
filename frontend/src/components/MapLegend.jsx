@@ -1,4 +1,12 @@
-import { Collapse, Text, Divider, Button, Tooltip, Group } from "@mantine/core";
+import {
+  Collapse,
+  Text,
+  Divider,
+  Button,
+  Tooltip,
+  Group,
+  Stack,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import TYPES from "../context/AnnotationTypes";
 
@@ -15,30 +23,33 @@ function MapLegend() {
         </Tooltip>
       </Group>
       <Collapse in={opened}>
-        <Text bg="#222222" size="lg" p="md" style={{ borderRadius: "10px" }}>
+        <Stack bg="#000000" p="md" style={{ borderRadius: "10px" }}>
           <h2 className="text-xl font-bold" style={{ color: "white" }}>
             Legend
           </h2>
           <Divider color="white" />
-          <p style={{ color: "gray", fontWeight: "bold", fontSize: "16px" }}>
+          <div style={{ color: "gray", fontWeight: "bold", fontSize: "16px" }}>
             Sensor colors, interpretation of sensor values.
-          </p>
-          <p style={{ color: "white", fontSize: "16px" }}>
+          </div>
+          <div style={{ color: "white", fontSize: "16px" }}>
             Whiter markers: Lower sensor value, close to 0
-          </p>
-          <p style={{ color: "#ff4444", fontSize: "16px" }}>
+          </div>
+          <div style={{ color: "#ff4444", fontSize: "16px" }}>
             Redder markers: Higher sensor value, close to 1
-          </p>
+          </div>
+          <div style={{ color: "purple", fontSize: "16px" }}>
+            Purple markers: No value, just displays the location of the sensor
+          </div>
           <Divider color="white" />
-          <p style={{ color: "gray", fontWeight: "bold", fontSize: "16px" }}>
+          <div style={{ color: "gray", fontWeight: "bold", fontSize: "16px" }}>
             Hexagon colors, interpretation of hexagon types.
-          </p>
+          </div>
           {Object.entries(TYPES).map(([type, color]) => (
-            <p style={{ color: color, fontSize: "16px" }} key={type}>
+            <div style={{ color: color, fontSize: "16px" }} key={type}>
               {type}
-            </p>
+            </div>
           ))}
-        </Text>
+        </Stack>
       </Collapse>
     </>
   );
