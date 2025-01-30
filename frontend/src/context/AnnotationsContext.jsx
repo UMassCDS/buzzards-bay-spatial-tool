@@ -7,6 +7,8 @@ const AnnotationsContext = createContext();
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState(TYPES);
   const [priorAnnotations, setPriorAnnotations] = useState([]);
+  const [editingAnnotation, setEditingAnnotation] = useState(false);
+  const [viewingPriorAnnotation, setViewingPriorAnnotation] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [updatingAnnotation, setUpdatingAnnotation] = useState(false);
@@ -46,8 +48,14 @@ const AnnotationsContextProvider = ({ children }) => {
   };
 
   const updatePriorAnnotations = (annotation) => {
+    console.log(priorAnnotations);
     if (annotation.index) {
-      setPriorAnnotations((priors) => [...priors, annotation]);
+      // setPriorAnnotations((priors) => [...priors, annotation]);
+      setPriorAnnotations((priors) =>
+        priors.map((prior) =>
+          prior.index === annotation.index ? annotation : prior
+        )
+      );
     } else {
       addToPriorAnnotations(annotation);
     }
@@ -187,6 +195,8 @@ const AnnotationsContextProvider = ({ children }) => {
   return (
     <AnnotationsContext.Provider
       value={{
+        editingAnnotation,
+        viewingPriorAnnotation,
         priorAnnotations,
         currentNotes,
         currentHexes,
@@ -195,6 +205,8 @@ const AnnotationsContextProvider = ({ children }) => {
         annotationTypes,
         resetInterview,
         setIntervieweeId,
+        setEditingAnnotation,
+        setViewingPriorAnnotation,
         saveInterview,
         saveStateToStorage,
         clearStateFromStorage,

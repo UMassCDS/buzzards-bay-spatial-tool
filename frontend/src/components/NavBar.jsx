@@ -28,8 +28,8 @@ function NavBar() {
         <MapLegend />
         <Divider />
         <Annotations />
-        <Divider />
-        <AnnotationInput />
+        {/* <Divider />
+        <AnnotationInput /> */}
         <Divider />
         <Button
           variant="filled"

@@ -262,6 +262,11 @@ function Map() {
   }, [context.priorAnnotations, context.annotationTypes]);
 
   const onAddSelectionHexagon = (hexagonID) => {
+    if (context.viewingPriorAnnotation && !context.editingAnnotation) {
+      alert('Please click on "Edit" to edit the annotation.');
+      return;
+    }
+
     const idx = selectedHexagons.indexOf(hexagonID);
     let newSelects;
     if (idx > -1) {
