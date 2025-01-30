@@ -26,8 +26,7 @@ import "../styles/Annotations.css";
 function Annotations() {
   const [opened, { toggle }] = useDisclosure(true);
   const context = useContext(AnnotationsContext);
-  // const [viewingPriorAnnotation, setViewingPriorAnnotation] = useState(false);
-  // const [editMode, setEditMode] = useState(false);
+  const [oldAnnotation, setOldAnnotation] = useState(null);
 
   const form = useForm({
     mode: "controlled",
@@ -73,9 +72,17 @@ function Annotations() {
   };
 
   const handlePriorAnnotationClick = (item) => {
+    if (context.viewingPriorAnnotation && context.editingAnnotation) {
+      alert("Please save or cancel current editing annotation.");
+      return;
+    }
+
+    console.log(item);
+
     context.setViewingPriorAnnotation(true);
     context.setCurrentAnnotation(item);
     context.setEditingAnnotation(false);
+    setOldAnnotation(item);
   };
 
   const handleDelete = (item, event) => {
@@ -88,6 +95,13 @@ function Annotations() {
     context.setEditingAnnotation(false);
     context.resetCurrentAnnotation();
     form.reset();
+  };
+
+  const handleCancelEdit = () => {
+    console.log(oldAnnotation);
+    context.setCurrentAnnotation(oldAnnotation);
+    context.setEditingAnnotation(false);
+    setOldAnnotation(null);
   };
 
   useEffect(() => {
@@ -232,7 +246,7 @@ function Annotations() {
                     type="button"
                     variant="light"
                     color="red"
-                    onClick={() => context.setEditingAnnotation(false)}
+                    onClick={handleCancelEdit}
                   >
                     Cancel Edit
                   </Button>

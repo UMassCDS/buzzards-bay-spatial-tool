@@ -50,12 +50,15 @@ const AnnotationsContextProvider = ({ children }) => {
   const updatePriorAnnotations = (annotation) => {
     console.log(priorAnnotations);
     if (annotation.index) {
-      // setPriorAnnotations((priors) => [...priors, annotation]);
-      setPriorAnnotations((priors) =>
-        priors.map((prior) =>
-          prior.index === annotation.index ? annotation : prior
-        )
-      );
+      if (!priorAnnotations.find((prior) => prior.index === annotation.index)) {
+        addToPriorAnnotations(annotation);
+      } else {
+        setPriorAnnotations((priors) =>
+          priors.map((prior) =>
+            prior.index === annotation.index ? annotation : prior
+          )
+        );
+      }
     } else {
       addToPriorAnnotations(annotation);
     }
