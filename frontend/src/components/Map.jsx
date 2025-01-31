@@ -199,8 +199,14 @@ function SelectionLayer({ hexagons }) {
 }
 
 const ClickHandler = ({ onAddSelectionHexagon }) => {
+  const context = useContext(AnnotationsContext);
   useMapEvents({
     click: (e) => {
+      if (context.viewingPriorAnnotation && !context.editingAnnotation) {
+        alert('Please click on "Edit" to edit the annotation.');
+        return;
+      }
+
       const hexagonID = h3.latLngToCell(
         e.latlng.lat,
         e.latlng.lng,
@@ -250,7 +256,19 @@ function Map() {
   }, [selectedHexagons, context.currentNotes.type]);
 
   useEffect(() => {
-    const hexs = context.priorAnnotations.flatMap((annotation) =>
+    console.log(context.priorAnnotations);
+    console.log(context.currentNotes);
+    let priorsWithoutCurrent;
+    if (context.viewingPriorAnnotation) {
+      priorsWithoutCurrent = context.priorAnnotations.filter(
+        (annotation) => annotation.index !== context.currentNotes.index
+      );
+    } else {
+      priorsWithoutCurrent = context.priorAnnotations;
+    }
+
+    console.log(priorsWithoutCurrent);
+    const hexs = priorsWithoutCurrent.flatMap((annotation) =>
       Object.keys(context.annotationTypes).length > 0
         ? h3IDsToGeoBoundary({
             hexagonsIDs: annotation.annotationHexes,
@@ -259,14 +277,9 @@ function Map() {
         : []
     );
     setPriorAnnotations(hexs);
-  }, [context.priorAnnotations, context.annotationTypes]);
+  }, [context.priorAnnotations, context.annotationTypes, context.currentNotes]);
 
   const onAddSelectionHexagon = (hexagonID) => {
-    if (context.viewingPriorAnnotation && !context.editingAnnotation) {
-      alert('Please click on "Edit" to edit the annotation.');
-      return;
-    }
-
     const idx = selectedHexagons.indexOf(hexagonID);
     let newSelects;
     if (idx > -1) {
@@ -354,22 +367,24 @@ function Map() {
         </LayersControl.Overlay>
       </LayersControl>
       <FeatureGroup>
-        <EditControl
-          position="topleft"
-          onCreated={handleMultiSelect}
-          draw={{
-            rectangle: true,
-            polygon: true,
-            circle: false,
-            polyline: false,
-            marker: false,
-            circlemarker: false,
-          }}
-          edit={{
-            edit: false,
-            remove: false,
-          }}
-        />
+        {(!context.viewingPriorAnnotation || context.editingAnnotation) && (
+          <EditControl
+            position="topleft"
+            onCreated={handleMultiSelect}
+            draw={{
+              rectangle: true,
+              polygon: true,
+              circle: false,
+              polyline: false,
+              marker: false,
+              circlemarker: false,
+            }}
+            edit={{
+              edit: false,
+              remove: false,
+            }}
+          />
+        )}
       </FeatureGroup>
       <ClickHandler onAddSelectionHexagon={onAddSelectionHexagon} />
     </MapContainer>
