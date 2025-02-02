@@ -12,6 +12,7 @@
     "start": "concurrently \"npm run start:backend\" \"npm run preview\""
   },
   "dependencies": {
+    "@gnatih/leaflet.legend": "^1.0.1",
     "@mantine/core": "^7.13.4",
     "@mantine/form": "^7.13.4",
     "@mantine/hooks": "^7.13.4",

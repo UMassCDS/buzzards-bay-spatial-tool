@@ -25,11 +25,9 @@ function NavBar() {
       <Stack gap="md">
         <UserInformation />
         <Divider />
-        <MapLegend />
-        <Divider />
+        {/* <MapLegend /> */}
+        {/* <Divider /> */}
         <Annotations />
-        {/* <Divider />
-        <AnnotationInput /> */}
         <Divider />
         <Button
           variant="filled"

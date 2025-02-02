@@ -8,12 +8,14 @@ import {
   Popup,
   useMapEvents,
   Marker,
+  useMap,
 } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "../styles/Map.css";
 import L from "leaflet";
+import "@gnatih/leaflet.legend";
 import * as h3 from "h3-js";
 import { useEffect, useState, useContext } from "react";
 
@@ -35,6 +37,118 @@ L.drawLocal.draw.handlers.polygon.tooltip.cont =
   "Continue drawing the shape for ADDING annotation hexagons";
 L.drawLocal.draw.handlers.polygon.tooltip.end =
   "Click the first point to finish drawing and fill the shape with hexagons";
+
+function BuildLegend() {
+  const context = useContext(AnnotationsContext);
+
+  const hexTypeSymbols = Object.keys(context.annotationTypes).map((type) => ({
+    label: type,
+    type: "polygon",
+    sides: 6,
+    color: context.annotationTypes[type],
+    fillColor: context.annotationTypes[type],
+    fillOpacity: 0.2,
+    weight: 2,
+  }));
+
+  const map = useMap();
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      .leaflet-legend-title {
+        margin: 0 0 0 0;
+        font-size: 10px;
+        font-weight: bold;
+      }
+      .leaflet-legend-contents {
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+      }
+      .leaflet-legend-column {
+        flex: 1;
+      }
+      .leaflet-legend-item {
+        margin-bottom: 3px;
+        font-size: 10px;
+      }`;
+    document.head.appendChild(style);
+
+    const legend = L.control
+      .Legend({
+        position: "bottomright",
+        collapsed: false,
+        symbolWidth: 20,
+        opacity: 1,
+        column: 2,
+        legends: [
+          ...hexTypeSymbols,
+          {
+            label: "Sensor with no value",
+            type: "circle",
+            radius: 6,
+            color: "purple",
+            fillColor: "purple",
+            fillOpacity: 1.0,
+            weight: 1,
+          },
+          {
+            label: "Sensor with value [0]",
+            type: "circle",
+            radius: 6,
+            color: "black",
+            fillColor: RedColorGradient(0),
+            fillOpacity: 1.0,
+            weight: 1,
+          },
+          {
+            label: "Sensor with value [0.25]",
+            type: "circle",
+            radius: 6,
+            color: "black",
+            fillColor: RedColorGradient(0.25),
+            fillOpacity: 1.0,
+            weight: 1,
+          },
+          {
+            label: "Sensor with value [0.5]",
+            type: "circle",
+            radius: 6,
+            color: "black",
+            fillColor: RedColorGradient(0.5),
+            fillOpacity: 1.0,
+            weight: 1,
+          },
+          {
+            label: "Sensor with value [0.75]",
+            type: "circle",
+            radius: 6,
+            color: "black",
+            fillColor: RedColorGradient(0.75),
+            fillOpacity: 1.0,
+            weight: 1,
+          },
+          {
+            label: "Sensor with value [1.0]",
+            type: "circle",
+            radius: 6,
+            color: "black",
+            fillColor: RedColorGradient(1.0),
+            fillOpacity: 1.0,
+            weight: 1,
+          },
+        ],
+      })
+      .addTo(map);
+
+    return () => {
+      legend.remove();
+      style.remove();
+    };
+  }, []);
+
+  return null;
+}
 
 function SensorLayerNoValues() {
   const [markers, setMarkers] = useState([]);
@@ -328,6 +442,7 @@ function Map() {
       zoom={11}
       style={{ height: "80vh", width: "100%", zIndex: 0 }}
     >
+      <BuildLegend />
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="OpenStreetMap">
           <TileLayer
