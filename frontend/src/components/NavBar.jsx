@@ -25,8 +25,6 @@ function NavBar() {
       <Stack gap="md">
         <UserInformation />
         <Divider />
-        {/* <MapLegend /> */}
-        {/* <Divider /> */}
         <Annotations />
         <Divider />
         <Button
@@ -46,8 +44,6 @@ function NavBar() {
         >
           Submit Interview
         </Button>
-        <Divider />
-        <ListOfAnnotations />
       </Stack>
     </div>
   );

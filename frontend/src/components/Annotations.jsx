@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { FaRegTrashAlt, FaRegEdit } from "react-icons/fa";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext";
+import ListOfAnnotations from "./ListOfAnnotations.jsx";
 
 import "../styles/Annotations.css";
 
@@ -114,67 +115,6 @@ function Annotations() {
 
   return (
     <>
-      <Box>
-        <Group justify="center">
-          <Tooltip label="List your annotations from this interview session.">
-            <Button
-              onClick={toggle}
-              variant="outline"
-              color="yellow"
-              radius="md"
-            >
-              Prior Annotations | {opened ? "Hide" : "Show"}
-            </Button>
-          </Tooltip>
-        </Group>
-
-        <Collapse in={opened} p="sm">
-          <Stack gap="sm">
-            {context.priorAnnotations
-              .sort(sortByAnnotationType)
-              .map((item, index) => (
-                <Paper
-                  className="annotation_paper"
-                  key={index}
-                  withBorder
-                  style={{
-                    cursor: "pointer",
-                  }}
-                  shadow="xs"
-                  p="sm"
-                  onClick={() => handlePriorAnnotationClick(item)}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div>
-                      <Text
-                        size="sm"
-                        style={{ color: context.annotationTypes[item.type] }}
-                      >
-                        {item.type}
-                      </Text>
-                      <Text size="md" fw={500}>
-                        {item.title}
-                      </Text>
-                    </div>
-                    <ActionIcon
-                      color="red"
-                      onClick={(event) => handleDelete(item, event)}
-                    >
-                      <FaRegTrashAlt size={16} />
-                    </ActionIcon>
-                  </div>
-                </Paper>
-              ))}
-          </Stack>
-        </Collapse>
-      </Box>
-      <Divider />
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Fieldset legend="Annotation Input">
           <Stack gap="sm">
@@ -271,6 +211,69 @@ function Annotations() {
           </Stack>
         </Fieldset>
       </form>
+      <Divider />
+      <ListOfAnnotations />
+      <Divider />
+      <Box>
+        <Group justify="center">
+          <Tooltip label="List your annotations from this interview session.">
+            <Button
+              onClick={toggle}
+              variant="outline"
+              color="yellow"
+              radius="md"
+            >
+              Prior Annotations | {opened ? "Hide" : "Show"}
+            </Button>
+          </Tooltip>
+        </Group>
+        <Collapse in={opened} p="sm">
+          <Stack gap="sm">
+            {context.priorAnnotations
+              .sort(sortByAnnotationType)
+              .map((item, index) => (
+                <Paper
+                  className="annotation_paper"
+                  key={index}
+                  withBorder
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  shadow="xs"
+                  p="sm"
+                  onClick={() => handlePriorAnnotationClick(item)}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <Text
+                        size="sm"
+                        style={{ color: context.annotationTypes[item.type] }}
+                      >
+                        {item.type}
+                      </Text>
+                      <Text size="md" fw={500}>
+                        {item.title}
+                      </Text>
+                    </div>
+                    <ActionIcon
+                      color="red"
+                      onClick={(event) => handleDelete(item, event)}
+                    >
+                      <FaRegTrashAlt size={16} />
+                    </ActionIcon>
+                  </div>
+                </Paper>
+              ))}
+          </Stack>
+        </Collapse>
+      </Box>
+      <Divider />
     </>
   );
 }
