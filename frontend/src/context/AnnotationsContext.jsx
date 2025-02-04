@@ -126,9 +126,9 @@ const AnnotationsContextProvider = ({ children }) => {
     const state = {
       priorAnnotations,
       currentIndex,
-      currentNotes,
+      // currentNotes,
       intervieweeId,
-      currentHexes,
+      // currentHexes,
     };
     localStorage.setItem("annotationsState", JSON.stringify(state));
   };
@@ -149,24 +149,24 @@ const AnnotationsContextProvider = ({ children }) => {
         const {
           priorAnnotations,
           currentIndex,
-          currentNotes,
+          // currentNotes,
           intervieweeId,
-          currentHexes,
+          // currentHexes,
         } = JSON.parse(savedState);
 
         setPriorAnnotations(priorAnnotations || []);
         setCurrentIndex(currentIndex || 0);
-        setCurrentNotes(
-          currentNotes || {
-            type: "Area of Interest",
-            title: "",
-            notes: "",
-            createdAt: new Date(),
-            modifiedAt: new Date(),
-          }
-        );
+        // setCurrentNotes(
+        //   currentNotes || {
+        //     type: "Area of Interest",
+        //     title: "",
+        //     notes: "",
+        //     createdAt: new Date(),
+        //     modifiedAt: new Date(),
+        //   }
+        // );
         setIntervieweeId(intervieweeId || "");
-        setCurrentHexes(currentHexes || []);
+        // setCurrentHexes(currentHexes || []);
       }
       setIsInitialized(true);
     };
