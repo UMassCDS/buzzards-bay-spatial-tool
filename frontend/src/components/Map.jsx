@@ -370,8 +370,8 @@ function Map() {
   }, [selectedHexagons, context.currentNotes.type]);
 
   useEffect(() => {
-    console.log(context.priorAnnotations);
-    console.log(context.currentNotes);
+    // console.log(context.priorAnnotations);
+    // console.log(context.currentNotes);
     let priorsWithoutCurrent;
     if (context.viewingPriorAnnotation) {
       priorsWithoutCurrent = context.priorAnnotations.filter(
@@ -381,7 +381,7 @@ function Map() {
       priorsWithoutCurrent = context.priorAnnotations;
     }
 
-    console.log(priorsWithoutCurrent);
+    // console.log(priorsWithoutCurrent);
     const hexs = priorsWithoutCurrent.flatMap((annotation) =>
       Object.keys(context.annotationTypes).length > 0
         ? h3IDsToGeoBoundary({

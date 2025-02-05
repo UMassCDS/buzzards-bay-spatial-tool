@@ -48,7 +48,10 @@ function Annotations() {
       ...formValues,
       annotationHexes: context.currentHexes,
     };
-    console.log(updatedAnnotation);
+
+    updatedAnnotation.modifiedAt = new Date();
+
+    // console.log(updatedAnnotation);
 
     if (context.currentHexes.length === 0) {
       alert("Please select a region first, at least one hex is required.");

@@ -48,9 +48,14 @@ const AnnotationsContextProvider = ({ children }) => {
   };
 
   const updatePriorAnnotations = (annotation) => {
+    console.log(annotation);
     console.log(priorAnnotations);
-    if (annotation.index) {
-      if (!priorAnnotations.find((prior) => prior.index === annotation.index)) {
+    if (Object.keys(annotation).includes("index")) {
+      const existingAnnotation = priorAnnotations.find(
+        (prior) => prior.index === annotation.index
+      );
+
+      if (!existingAnnotation) {
         addToPriorAnnotations(annotation);
       } else {
         setPriorAnnotations((priors) =>
