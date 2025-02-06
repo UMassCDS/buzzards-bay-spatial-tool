@@ -51,14 +51,77 @@ function BuildLegend() {
     weight: 2,
   }));
 
+  const sensorSymbols = [];
+
+  if (context.sensorDataVisible) {
+    sensorSymbols.push({
+      label: "Sensor locations",
+      type: "circle",
+      radius: 6,
+      color: "purple",
+      fillColor: "purple",
+      weight: 1,
+    });
+  }
+
+  if (context.sensorLocationsVisible) {
+    sensorSymbols.push(
+      ...[
+        {
+          label: "Sensor with value [0]",
+          type: "circle",
+          radius: 6,
+          color: "black",
+          fillColor: RedColorGradient(0),
+          fillOpacity: 1.0,
+          weight: 1,
+        },
+        {
+          label: "Sensor with value [0.25]",
+          type: "circle",
+          radius: 6,
+          color: "black",
+          fillColor: RedColorGradient(0.25),
+          fillOpacity: 1.0,
+          weight: 1,
+        },
+        {
+          label: "Sensor with value [0.5]",
+          type: "circle",
+          radius: 6,
+          color: "black",
+          fillColor: RedColorGradient(0.5),
+          fillOpacity: 1.0,
+          weight: 1,
+        },
+        {
+          label: "Sensor with value [0.75]",
+          type: "circle",
+          radius: 6,
+          color: "black",
+          fillColor: RedColorGradient(0.75),
+          fillOpacity: 1.0,
+          weight: 1,
+        },
+        {
+          label: "Sensor with value [1.0]",
+          type: "circle",
+          radius: 6,
+          color: "black",
+          fillColor: RedColorGradient(1.0),
+          fillOpacity: 1.0,
+          weight: 1,
+        },
+      ]
+    );
+  }
+
   const map = useMap();
   useEffect(() => {
     const style = document.createElement("style");
     style.textContent = `
       .leaflet-legend-title {
-        margin: 0 0 0 0;
-        font-size: 10px;
-        font-weight: bold;
+        display: none;
       }
       .leaflet-legend-contents {
         display: flex;
@@ -81,63 +144,7 @@ function BuildLegend() {
         symbolWidth: 20,
         opacity: 1,
         column: 2,
-        legends: [
-          ...hexTypeSymbols,
-          {
-            label: "Sensor with no value",
-            type: "circle",
-            radius: 6,
-            color: "purple",
-            fillColor: "purple",
-            fillOpacity: 1.0,
-            weight: 1,
-          },
-          {
-            label: "Sensor with value [0]",
-            type: "circle",
-            radius: 6,
-            color: "black",
-            fillColor: RedColorGradient(0),
-            fillOpacity: 1.0,
-            weight: 1,
-          },
-          {
-            label: "Sensor with value [0.25]",
-            type: "circle",
-            radius: 6,
-            color: "black",
-            fillColor: RedColorGradient(0.25),
-            fillOpacity: 1.0,
-            weight: 1,
-          },
-          {
-            label: "Sensor with value [0.5]",
-            type: "circle",
-            radius: 6,
-            color: "black",
-            fillColor: RedColorGradient(0.5),
-            fillOpacity: 1.0,
-            weight: 1,
-          },
-          {
-            label: "Sensor with value [0.75]",
-            type: "circle",
-            radius: 6,
-            color: "black",
-            fillColor: RedColorGradient(0.75),
-            fillOpacity: 1.0,
-            weight: 1,
-          },
-          {
-            label: "Sensor with value [1.0]",
-            type: "circle",
-            radius: 6,
-            color: "black",
-            fillColor: RedColorGradient(1.0),
-            fillOpacity: 1.0,
-            weight: 1,
-          },
-        ],
+        legends: [...hexTypeSymbols, ...sensorSymbols],
       })
       .addTo(map);
 
@@ -178,9 +185,9 @@ function SensorLayerNoValues() {
           const color = "purple";
           const customIcon = L.divIcon({
             className: "custom-div-icon",
-            html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
+            html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%;"></div>`,
+            iconSize: [15, 15],
+            iconAnchor: [7.5, 7.5],
             popupAnchor: [0, -10],
           });
 
@@ -242,9 +249,9 @@ function SensorLayerWithValues() {
           const color = RedColorGradient(site["ran1"]);
           const customIcon = L.divIcon({
             className: "custom-div-icon",
-            html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
+            html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%;"></div>`,
+            iconSize: [15, 15],
+            iconAnchor: [7.5, 7.5],
             popupAnchor: [0, -10],
           });
 

@@ -13,6 +13,9 @@ const AnnotationsContextProvider = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [updatingAnnotation, setUpdatingAnnotation] = useState(false);
 
+  const [sensorDataVisible, setSensorDataVisible] = useState(true);
+  const [sensorLocationsVisible, setSensorLocationsVisible] = useState(true);
+
   const [currentNotes, setCurrentNotes] = useState({
     type: "Area of Interest",
     title: "",
@@ -211,6 +214,10 @@ const AnnotationsContextProvider = ({ children }) => {
         updatingAnnotation,
         intervieweeId,
         annotationTypes,
+        sensorDataVisible,
+        sensorLocationsVisible,
+        setSensorDataVisible,
+        setSensorLocationsVisible,
         resetInterview,
         setIntervieweeId,
         setEditingAnnotation,
