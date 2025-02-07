@@ -13,14 +13,17 @@ import {
   NativeSelect,
   TextInput,
   Textarea,
+  Blockquote,
+  Highlight,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { FaRegTrashAlt, FaRegEdit } from "react-icons/fa";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import ListOfAnnotations from "./ListOfAnnotations.jsx";
+import { IconInfoCircle } from "@tabler/icons-react";
 
 import "../styles/Annotations.css";
 
@@ -121,6 +124,18 @@ function Annotations() {
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Fieldset legend="Annotation Input">
           <Stack gap="sm">
+            {context.viewingPriorAnnotation && (
+              <Blockquote
+                color="blue"
+                icon={<IconInfoCircle size={20} />}
+                mt="xs"
+                p="md"
+              >
+                <Highlight highlight={["Edit"]}>
+                  You are viewing a prior annotation. Click on Edit to modify.
+                </Highlight>
+              </Blockquote>
+            )}
             <NativeSelect
               {...form.getInputProps("type")}
               withAsterisk
@@ -176,7 +191,7 @@ function Annotations() {
                     disabled={context.editingAnnotation}
                     onClick={handleStopViewing}
                   >
-                    Stop Viewing
+                    Add new annotation
                   </Button>
                 </>
               )}
@@ -276,7 +291,6 @@ function Annotations() {
           </Stack>
         </Collapse>
       </Box>
-      <Divider />
     </>
   );
 }
