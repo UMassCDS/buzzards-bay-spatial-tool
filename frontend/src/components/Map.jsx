@@ -283,20 +283,16 @@ function SensorLayerWithValues() {
   );
 }
 
-function PriorAnnotationsLayer({ hexagons }) {
+function PriorAnnotationsLayerByType({ hexagons }) {
   return (
     <>
-      {hexagons.map((hex, idx) => (
+      {hexagons.map((hex) => (
         <Polygon
-          key={idx}
+          key={hex.id}
           weight={1}
           fillOpacity={0.2}
           positions={hex.boundary}
-          pathOptions={{
-            color: hex.color,
-            fillColor: hex.color,
-            opacity: 0.2,
-          }}
+          pathOptions={{ color: hex.color, fillColor: hex.color, opacity: 0.2 }}
         />
       ))}
     </>
@@ -360,6 +356,7 @@ function Map() {
       id: hexID,
       boundary: h3.cellToBoundary(hexID, false).map(([lat, lng]) => [lat, lng]),
       color: color,
+      type: type,
     }));
   };
 
@@ -457,14 +454,12 @@ function Map() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
         </LayersControl.BaseLayer>
-
         <LayersControl.BaseLayer name="World Light Gray Base">
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
             attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
           />
         </LayersControl.BaseLayer>
-
         <LayersControl.BaseLayer name="World Imagery">
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -476,11 +471,23 @@ function Map() {
             <SelectionLayer hexagons={hexagonsBoundaries} />
           </FeatureGroup>
         </LayersControl.Overlay>
-        <LayersControl.Overlay checked name="Prior Annotations">
-          <FeatureGroup>
-            <PriorAnnotationsLayer hexagons={priorAnnotations} />
-          </FeatureGroup>
-        </LayersControl.Overlay>
+        r
+        {Object.keys(context.annotationTypes).map((type) => {
+          const filteredHexagons = priorAnnotations.filter(
+            (annotation) => annotation.type === type
+          );
+          return (
+            <LayersControl.Overlay
+              key={type}
+              checked
+              name={`${type} - Annotations`}
+            >
+              <FeatureGroup>
+                <PriorAnnotationsLayerByType hexagons={filteredHexagons} />
+              </FeatureGroup>
+            </LayersControl.Overlay>
+          );
+        })}
         <LayersControl.Overlay name="Sensor Locations - No Values">
           <SensorLayerNoValues />
         </LayersControl.Overlay>
