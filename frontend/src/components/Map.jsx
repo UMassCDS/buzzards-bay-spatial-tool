@@ -38,6 +38,87 @@ L.drawLocal.draw.handlers.polygon.tooltip.cont =
 L.drawLocal.draw.handlers.polygon.tooltip.end =
   "Click the first point to finish drawing and fill the shape with hexagons";
 
+// function BuildLegend() {
+//   const context = useContext(AnnotationsContext);
+
+//   const hexTypeSymbols = Object.keys(context.annotationTypes).map((type) => ({
+//     label: type,
+//     type: "polygon",
+//     sides: 6,
+//     color: context.annotationTypes[type],
+//     fillColor: context.annotationTypes[type],
+//     fillOpacity: 0.2,
+//     weight: 2,
+//   }));
+
+//   const sensorSymbols = [];
+
+//   if (context.sensorDataVisible) {
+//     sensorSymbols.push({
+//       label: "Sensor locations",
+//       type: "circle",
+//       radius: 6,
+//       color: "purple",
+//       fillColor: "purple",
+//       weight: 1,
+//     });
+//   }
+
+//   if (context.sensorLocationsVisible) {
+//     sensorSymbols.push({
+//       label: "Sensor Values",
+//       type: "rectangle",
+//       html: `<div style="width: 100px; height: 10px; background: linear-gradient(to right, ${RedColorGradient(
+//         0
+//       )}, ${RedColorGradient(1.0)});"></div>`,
+//       weight: 1,
+//     });
+//   }
+
+//   const map = useMap();
+//   useEffect(() => {
+//     const style = document.createElement("style");
+//     style.textContent = `
+//         .leaflet-legend-title {
+//           display: none;
+//         }
+//         .leaflet-legend-contents {
+//           display: flex;
+//           flex-direction: column; /* Changed to column for better layout */
+//           gap: 5px;
+//         }
+//         .leaflet-legend-column {
+//           flex: 1;
+//         }
+//         .leaflet-legend-item {
+//           margin-bottom: 3px;
+//           font-size: 10px;
+//         }
+//         .leaflet-legend-item div {
+//           border: 1px solid black; /* Optional: Add border to the gradient bar */
+//         }`;
+//     document.head.appendChild(style);
+
+//     const legend = L.control
+//       .Legend({
+//         position: "bottomright",
+//         collapsed: false,
+//         symbolWidth: 20,
+//         opacity: 1,
+//         column: 2,
+//         legends: [...hexTypeSymbols, ...sensorSymbols],
+//       })
+//       .addTo(map);
+
+//     return () => {
+//       legend.remove();
+//       style.remove();
+//     };
+//   }, []);
+
+//   return null;
+// }
+
 function BuildLegend() {
   const context = useContext(AnnotationsContext);
 
@@ -67,51 +148,69 @@ function BuildLegend() {
   if (context.sensorLocationsVisible) {
     sensorSymbols.push(
       ...[
-        {
-          label: "Sensor with value [0]",
-          type: "circle",
-          radius: 6,
-          color: "black",
-          fillColor: RedColorGradient(0),
-          fillOpacity: 1.0,
-          weight: 1,
-        },
-        {
-          label: "Sensor with value [0.25]",
-          type: "circle",
-          radius: 6,
-          color: "black",
-          fillColor: RedColorGradient(0.25),
-          fillOpacity: 1.0,
-          weight: 1,
-        },
-        {
-          label: "Sensor with value [0.5]",
-          type: "circle",
-          radius: 6,
-          color: "black",
-          fillColor: RedColorGradient(0.5),
-          fillOpacity: 1.0,
-          weight: 1,
-        },
-        {
-          label: "Sensor with value [0.75]",
-          type: "circle",
-          radius: 6,
-          color: "black",
-          fillColor: RedColorGradient(0.75),
-          fillOpacity: 1.0,
-          weight: 1,
-        },
-        {
-          label: "Sensor with value [1.0]",
-          type: "circle",
-          radius: 6,
-          color: "black",
-          fillColor: RedColorGradient(1.0),
-          fillOpacity: 1.0,
-          weight: 1,
-        },
+        // {
+        //   label: "Sensor with value [0]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(0),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
+        // {
+        //   label: "Sensor with value [0.33]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(0.33),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
+        // {
+        //   label: "Sensor with value [0.66]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(0.66),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
+        // {
+        //   label: "Sensor with value [0.25]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(0.25),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
+        // {
+        //   label: "Sensor with value [0.5]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(0.5),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
+        // {
+        //   label: "Sensor with value [0.75]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(0.75),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
+        // {
+        //   label: "Sensor with value [1.0]",
+        //   type: "circle",
+        //   radius: 6,
+        //   color: "black",
+        //   fillColor: RedColorGradient(1.0),
+        //   fillOpacity: 1.0,
+        //   weight: 1,
+        // },
       ]
     );
   }
@@ -127,6 +226,7 @@ function BuildLegend() {
         display: flex;
         flex-direction: row;
         gap: 5px;
+        padding: 7px;
       }
       .leaflet-legend-column {
         flex: 1;
@@ -143,11 +243,25 @@ function BuildLegend() {
         collapsed: false,
         symbolWidth: 20,
         opacity: 1,
-        column: 2,
+        column: 1,
         legends: [...hexTypeSymbols, ...sensorSymbols],
       })
       .addTo(map);
 
+    // Hacking :(
+    const legend_html = document.querySelector(".leaflet-legend-contents");
+    const column = legend_html.querySelector(".leaflet-legend-column");
+    const gradient_div = document.createElement("div");
+    gradient_div.className = "leaflet-legend-item";
+    gradient_div.innerHTML = `
+      <div style="display: flex; align-items: center;">
+        <span style="margin-right: 5px;">0</span>
+        <div style="width: 100px; height: 10px; background: linear-gradient(to right, ${RedColorGradient(
+          0
+        )}, ${RedColorGradient(1.0)}); border: 1px solid black;"></div>
+        <span style="margin-left: 5px;">1 | Sensor values</span>
+      </div>`;
+    column.appendChild(gradient_div);
     return () => {
       legend.remove();
       style.remove();
