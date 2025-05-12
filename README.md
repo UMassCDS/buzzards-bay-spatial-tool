@@ -1,6 +1,9 @@
 # Buzzards Bay Spatial Tool
 A tool used to collect spatial annotations in interviews.
 
+## Future Dev
+Please refer to devnotes.md to learn about the dev side of the project.
+
 ## Installation
 Open your terminal and clone the repo: `git clone https://github.com/UMassCDS/buzzards-bay-spatial-tool.git`, or download as a zip
 

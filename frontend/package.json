@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start:backend": "nodemon backend/server.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -13,9 +12,11 @@
     "start": "concurrently \"npm run start:backend\" \"npm run preview\""
   },
   "dependencies": {
+    "@gnatih/leaflet.legend": "^1.0.1",
     "@mantine/core": "^7.13.4",
     "@mantine/form": "^7.13.4",
     "@mantine/hooks": "^7.13.4",
+    "@tabler/icons-react": "^3.30.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",

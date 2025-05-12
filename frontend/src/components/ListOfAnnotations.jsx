@@ -4,7 +4,7 @@ import { Stack, Text, Collapse, Group, Button } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 function ListOfAnnotations() {
-  const [opened, { toggle }] = useDisclosure(true);
+  const [opened, { toggle }] = useDisclosure(false);
   const context = useContext(AnnotationsContext);
   const label = "Area of Interest";
 
