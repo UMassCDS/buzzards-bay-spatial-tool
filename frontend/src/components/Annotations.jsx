@@ -122,7 +122,7 @@ function Annotations() {
   return (
     <>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Fieldset legend="Annotation Input">
+        <Fieldset legend="Data Input Panel">
           <Stack gap="sm">
             {context.viewingPriorAnnotation && (
               <Blockquote
@@ -139,7 +139,7 @@ function Annotations() {
             <NativeSelect
               {...form.getInputProps("type")}
               withAsterisk
-              label="Select Annotation Type"
+              label="Select Type of Information"
               data={Object.keys(context.annotationTypes)}
               disabled={
                 context.viewingPriorAnnotation && !context.editingAnnotation

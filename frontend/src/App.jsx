@@ -65,7 +65,7 @@ function App() {
             {...userCodeField.getInputProps()}
             required={true}
             label="User code"
-            description="Unique identifier for the interviewee, you must enter code to proceed"
+            description="A User Code is required to access the tool. Please enter the User Code provided by the Interviewer."
             mb="md"
           />
           <Button
