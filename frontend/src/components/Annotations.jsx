@@ -221,7 +221,7 @@ function Annotations() {
                     color="red"
                     onClick={() => handleStopViewing()}
                   >
-                    Reset
+                    Clear
                   </Button>
                 </>
               )}
