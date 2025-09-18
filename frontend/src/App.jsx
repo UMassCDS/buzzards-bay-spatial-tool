@@ -88,7 +88,7 @@ function App() {
             />
             {/* <GiHarborDock size={30} /> */}
             <Legend />
-            <Title order={2}>Buzzards Bay Interview Tool</Title>
+            <Title order={2}>COMBB Water Quality Monitoring Locations Interview Tool</Title>
           </Group>
         </AppShell.Header>
         <AppShell.Navbar
