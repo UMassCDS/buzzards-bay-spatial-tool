@@ -22,7 +22,6 @@ import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext";
-import ListOfAnnotations from "./ListOfAnnotations.jsx";
 import { IconInfoCircle } from "@tabler/icons-react";
 
 import "../styles/Annotations.css";
@@ -122,7 +121,7 @@ function Annotations() {
   return (
     <>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Fieldset legend="Annotation Input">
+        <Fieldset legend="Data Input Panel">
           <Stack gap="sm">
             {context.viewingPriorAnnotation && (
               <Blockquote
@@ -139,7 +138,7 @@ function Annotations() {
             <NativeSelect
               {...form.getInputProps("type")}
               withAsterisk
-              label="Select Annotation Type"
+              label="Select Type of Information"
               data={Object.keys(context.annotationTypes)}
               disabled={
                 context.viewingPriorAnnotation && !context.editingAnnotation
@@ -221,7 +220,7 @@ function Annotations() {
                     color="red"
                     onClick={() => handleStopViewing()}
                   >
-                    Reset
+                    Clear
                   </Button>
                 </>
               )}
@@ -229,8 +228,7 @@ function Annotations() {
           </Stack>
         </Fieldset>
       </form>
-      <Divider />
-      <ListOfAnnotations />
+
       <Divider />
       <Box>
         <Group justify="center">

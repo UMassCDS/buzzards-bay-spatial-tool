@@ -65,7 +65,7 @@ function App() {
             {...userCodeField.getInputProps()}
             required={true}
             label="User code"
-            description="Unique identifier for the interviewee, you must enter code to proceed"
+            description="A User Code is required to access the tool. Please enter the User Code provided by the Interviewer."
             mb="md"
           />
           <Button
@@ -88,7 +88,7 @@ function App() {
             />
             {/* <GiHarborDock size={30} /> */}
             <Legend />
-            <Title order={2}>Buzzards Bay Interview Tool</Title>
+            <Title order={2}>COMBB Water Quality Monitoring Locations Interview Tool</Title>
           </Group>
         </AppShell.Header>
         <AppShell.Navbar

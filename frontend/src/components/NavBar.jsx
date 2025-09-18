@@ -42,7 +42,7 @@ function NavBar() {
             downloadFile(jsonContent, "interview.json");
           }}
         >
-          Submit Interview
+          Submit Data
         </Button>
       </Stack>
     </div>

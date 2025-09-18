@@ -78,7 +78,7 @@ function AnnotationInput() {
           <NativeSelect
             {...form.getInputProps("type")}
             withAsterisk
-            label="Select Annotation Type"
+            label="Select Type of Information"
             data={Object.keys(context.annotationTypes)}
             onChange={(event) => {
               form.setFieldValue("type", event.currentTarget.value);
