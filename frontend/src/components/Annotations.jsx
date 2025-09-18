@@ -22,7 +22,6 @@ import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext";
-import ListOfAnnotations from "./ListOfAnnotations.jsx";
 import { IconInfoCircle } from "@tabler/icons-react";
 
 import "../styles/Annotations.css";
@@ -229,8 +228,7 @@ function Annotations() {
           </Stack>
         </Fieldset>
       </form>
-      <Divider />
-      <ListOfAnnotations />
+
       <Divider />
       <Box>
         <Group justify="center">
