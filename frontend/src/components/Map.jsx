@@ -274,6 +274,7 @@ function BuildLegend() {
 function SensorLayerNoValues() {
   const [markers, setMarkers] = useState([]);
 
+  // TODO: See how sensor selection works
   useEffect(() => {
     async function fetchSensorMarkers() {
       try {
