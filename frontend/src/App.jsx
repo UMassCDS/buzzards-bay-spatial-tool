@@ -1,32 +1,35 @@
 import "@mantine/core/styles.css";
+import "./styles/Help.css";
 
 import {
+  ActionIcon,
   AppShell,
   Burger,
   Button,
-  Divider,
   Group,
   MantineProvider,
   Modal,
-  Skeleton,
+  Text,
   TextInput,
   Title,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { GiHarborDock } from "react-icons/gi";
 import "./App.css";
 
 import NavBar from "./components/NavBar";
 import MainContent from "./components/MainContent";
-import { useState, useContext, useEffect } from "react";
+import {useContext, useRef } from "react";
 import { useField } from "@mantine/form";
 import { AnnotationsContext } from "./context/AnnotationsContext";
 import Legend from "./components/Legend";
+import { GiHarborDock } from "react-icons/gi";
+import { IconQuestionMark } from "@tabler/icons-react";
 
 function App() {
   const context = useContext(AnnotationsContext);
   const [navBarOpened, { toggle }] = useDisclosure();
   const [modalOpened, { open, close }] = useDisclosure(true);
+  const helpTriggerRef = useRef();
 
   const validationFunction = (value) => {
     if (value === "") {
@@ -55,11 +58,25 @@ function App() {
         <Modal
           opened={modalOpened && context.intervieweeId === ""}
           onClose={close}
-          title="Login"
+          title={
+            <Group justify="space-between" style={{ width: '100%' }}>
+              <Text>Login</Text>
+              <ActionIcon
+                onClick={() => helpTriggerRef.current?.()}
+                variant="filled"
+                color="blue"
+                size="sm"
+                className="help-button"
+              >
+                <IconQuestionMark size={16} />
+              </ActionIcon>
+            </Group>
+          }
           closeOnClickOutside={false}
           closeOnEscape={false}
           withCloseButton={false}
           trapFocus
+          style={{ zIndex: 100 }}
         >
           <TextInput
             {...userCodeField.getInputProps()}
@@ -79,16 +96,18 @@ function App() {
           </Button>
         </Modal>
         <AppShell.Header>
-          <Group h="100%" px="sm">
-            <Burger
-              opened={navBarOpened}
-              onClick={toggle}
-              hiddenFrom="sm"
-              size="sm"
-            />
-            {/* <GiHarborDock size={30} /> */}
-            <Legend />
-            <Title order={2}>COMBB Water Quality Monitoring Locations Interview Tool</Title>
+          <Group h="100%" px="sm" justify="space-between">
+            <Group>
+              <Burger
+                opened={navBarOpened}
+                onClick={toggle}
+                hiddenFrom="sm"
+                size="sm"
+              />
+              <GiHarborDock size={30} />
+              <Title order={2}>COMBB Water Quality Monitoring Locations Interview Tool</Title>
+            </Group>
+            <Legend externalTrigger={helpTriggerRef} />
           </Group>
         </AppShell.Header>
         <AppShell.Navbar
