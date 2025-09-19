@@ -18,6 +18,8 @@ import L from "leaflet";
 import "@gnatih/leaflet.legend";
 import * as h3 from "h3-js";
 import { useEffect, useState, useContext } from "react";
+import { ActionIcon, Group, Text } from "@mantine/core";
+import { IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
 
 import { RedColorGradient } from "../util/ColorPicker.js";
 import { AnnotationsContext } from "../context/AnnotationsContext";
@@ -274,7 +276,6 @@ function BuildLegend() {
 function SensorLayerNoValues() {
   const [markers, setMarkers] = useState([]);
 
-  // TODO: See how sensor selection works
   useEffect(() => {
     async function fetchSensorMarkers() {
       try {
@@ -308,8 +309,7 @@ function SensorLayerNoValues() {
 
           return L.marker([site["latitude"], site["longitude"]], {
             icon: customIcon,
-          });
-          // .bindPopup(popupText);
+          }).bindPopup(popupText);
         });
         setMarkers(siteMarkers);
       } catch (error) {
@@ -451,6 +451,22 @@ const ClickHandler = ({ onAddSelectionHexagon }) => {
   return null;
 };
 
+const MapController = ({ mapMode }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (mapMode === "select") {
+      map.dragging.disable();
+      map.getContainer().style.cursor = 'crosshair';
+    } else {
+      map.dragging.enable();
+      map.getContainer().style.cursor = '';
+    }
+  }, [map, mapMode]);
+
+  return null;
+};
+
 function Map() {
   const context = useContext(AnnotationsContext);
   const [selectedHexagons, setSelectedHexagons] = useState([]);
@@ -460,6 +476,7 @@ function Map() {
 
   const [multiSelectHexagons, setMultiSelectHexagons] = useState([]);
   const [isAdd, setIsAdd] = useState(false);
+  const [mapMode, setMapMode] = useState("pan"); // "pan" or "select"
 
   const h3IDsToGeoBoundary = ({ hexagonsIDs, type }) => {
     if (!hexagonsIDs) {
@@ -557,11 +574,54 @@ function Map() {
   };
 
   return (
-    <MapContainer
-      center={[41.7454, -70.6181]}
-      zoom={11}
-      style={{ height: "80vh", width: "100%", zIndex: 0 }}
-    >
+    <div style={{ position: "relative" }}>
+      {/* Mode Toggle Button */}
+      <div
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "50px",
+          zIndex: 1000,
+          backgroundColor: "white",
+          borderRadius: "6px",
+          padding: "8px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        }}
+      >
+        <Group gap="xs" align="center">
+          <Text size="sm" fw={500}>
+            Mode:
+          </Text>
+          <ActionIcon
+            variant={mapMode === "pan" ? "filled" : "outline"}
+            color={mapMode === "pan" ? "blue" : "gray"}
+            size="sm"
+            onClick={() => setMapMode("pan")}
+            title="Pan Mode - Move the map around"
+          >
+            <IconArrowsMove size={16} />
+          </ActionIcon>
+          <ActionIcon
+            variant={mapMode === "select" ? "filled" : "outline"}
+            color={mapMode === "select" ? "green" : "gray"}
+            size="sm"
+            onClick={() => setMapMode("select")}
+            title="Select Mode - Click to add/remove hexagons"
+          >
+            <IconHandFinger size={16} />
+          </ActionIcon>
+          <Text size="xs" c={mapMode === "pan" ? "blue" : "green"}>
+            {mapMode === "pan" ? "Pan" : "Select"}
+          </Text>
+        </Group>
+      </div>
+
+      <MapContainer
+        center={[41.7454, -70.6181]}
+        zoom={11}
+        style={{ height: "80vh", width: "100%", zIndex: 0 }}
+      >
+      <MapController mapMode={mapMode} />
       <BuildLegend />
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="OpenStreetMap">
@@ -631,8 +691,11 @@ function Map() {
           />
         )}
       </FeatureGroup>
-      <ClickHandler onAddSelectionHexagon={onAddSelectionHexagon} />
+      {mapMode === "select" && (
+        <ClickHandler onAddSelectionHexagon={onAddSelectionHexagon} />
+      )}
     </MapContainer>
+    </div>
   );
 }
 
