@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Drawer,
@@ -8,12 +8,22 @@ import {
   Divider,
   Button,
 } from "@mantine/core";
-import { GiHarborDock } from "react-icons/gi";
-import { AnnotationsContext } from "../context/AnnotationsContext";
+import { IconQuestionMark } from "@tabler/icons-react";
+import { IoMdCloseCircleOutline } from "react-icons/io";
 
-function Legend() {
+import { AnnotationsContext } from "../context/AnnotationsContext";
+import PropTypes from "prop-types";
+
+function Legend({ externalTrigger = null }) {
   const [opened, { open, close }] = useDisclosure(false);
   const context = useContext(AnnotationsContext);
+
+  // Listen for external trigger
+  React.useEffect(() => {
+    if (externalTrigger) {
+      externalTrigger.current = open;
+    }
+  }, [externalTrigger, open]);
 
   return (
     <>
@@ -31,6 +41,10 @@ function Legend() {
             color: "#ffffff",
           },
         }}
+        closeButtonProps={{
+          icon: <IoMdCloseCircleOutline size={20} stroke={1.5} />,
+        }}
+
         position="right"
       >
         <Stack gap="xs" className="text-white">
@@ -64,26 +78,56 @@ function Legend() {
               drawing a rectangle
             </li>
           </ul>
-          <Divider my="md" color="black" />
-          <Text>
-            If there is an error with the application, or you want to start the
-            interview from the beginning. Warning, this action cannot be
-            reversed!
-          </Text>
-          <Button
-            onClick={context.resetInterview}
-            variant="outline"
-            color="red"
-          >
-            Clear current interview
-          </Button>
+          {context.intervieweeId && (
+            <>
+              <Divider my="md" color="black" />
+              <Text>
+                If there is an error with the application, or you want to start the
+                interview from the beginning. Warning, this action cannot be
+                reversed!
+              </Text>
+              <Button
+                onClick={context.resetInterview}
+                variant="outline"
+                color="red"
+              >
+                Clear current interview
+              </Button>
+            </>
+          )}
         </Stack>
       </Drawer>
-      <ActionIcon onClick={open} variant="outline" color="cyan">
-        <GiHarborDock size={30} />
+      <ActionIcon
+        onClick={open}
+        variant="filled"
+        color="blue"
+        size="lg"
+        style={{
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'scale(1.1)',
+            backgroundColor: 'var(--mantine-color-blue-7)'
+          }
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'scale(1.1)';
+          e.target.style.backgroundColor = 'var(--mantine-color-blue-7)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'scale(1)';
+          e.target.style.backgroundColor = 'var(--mantine-color-blue-6)';
+        }}
+      >
+        <IconQuestionMark size={20} />
       </ActionIcon>
     </>
   );
 }
+Legend.propTypes = {
+  externalTrigger: PropTypes.shape({
+    current: PropTypes.any,
+  }),
+};
 
 export default Legend;
