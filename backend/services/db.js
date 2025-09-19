@@ -27,6 +27,7 @@ export async function initializeDatabase() {
      );`,
 
     // Annotation table
+    // TODO: Consider if we need a separate AnnotationType table
     `IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Annotation' AND xtype='U')
      CREATE TABLE Annotation (
        AnnotationID INT IDENTITY(1,1) PRIMARY KEY,
