@@ -7,15 +7,15 @@ import { AnnotationsContext } from "../context/AnnotationsContext.jsx";
 function NavBar() {
   const context = useContext(AnnotationsContext);
 
-  const downloadFile = (content, filename) => {
-    const blob = new Blob([content], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  // const downloadFile = (content, filename) => {
+  //   const blob = new Blob([content], { type: "application/json" });
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement("a");
+  //   link.href = url;
+  //   link.download = filename;
+  //   link.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
   return (
     <div style={{ flexGrow: 1, overflow: "auto" }}>
@@ -35,8 +35,8 @@ function NavBar() {
             if (response.success) {
               context.resetInterview();
             }
-            const jsonContent = JSON.stringify(response.interview, null, 2);
-            downloadFile(jsonContent, "interview.json");
+            // const jsonContent = JSON.stringify(response.interview, null, 2);
+            // downloadFile(jsonContent, "interview.json");
           }}
         >
           Submit Data
