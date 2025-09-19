@@ -1,0 +1,9 @@
+.help-button {
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.help-button:hover {
+  transform: scale(1.1);
+  background-color: var(--mantine-color-blue-8) !important;
+}

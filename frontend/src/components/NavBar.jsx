@@ -1,11 +1,8 @@
 import UserInformation from "./UserInformation.jsx";
 import Annotations from "./Annotations.jsx";
-import AnnotationInput from "./AnnotationInput.jsx";
 import { Button, Divider, Stack } from "@mantine/core";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext.jsx";
-import ListOfAnnotations from "./ListOfAnnotations.jsx";
-import MapLegend from "./MapLegend.jsx";
 
 function NavBar() {
   const context = useContext(AnnotationsContext);

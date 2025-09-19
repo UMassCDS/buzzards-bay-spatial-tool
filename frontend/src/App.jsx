@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import "./styles/Help.css";
 
 import {
   ActionIcon,
@@ -65,18 +66,7 @@ function App() {
                 variant="filled"
                 color="blue"
                 size="sm"
-                style={{
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'scale(1.1)';
-                  e.target.style.backgroundColor = 'var(--mantine-color-blue-7)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'scale(1)';
-                  e.target.style.backgroundColor = 'var(--mantine-color-blue-6)';
-                }}
+                className="help-button"
               >
                 <IconQuestionMark size={16} />
               </ActionIcon>

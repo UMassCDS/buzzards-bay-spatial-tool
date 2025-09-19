@@ -13,6 +13,7 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import PropTypes from "prop-types";
+import "../styles/Help.css";
 
 function Legend({ externalTrigger = null }) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -102,22 +103,7 @@ function Legend({ externalTrigger = null }) {
         variant="filled"
         color="blue"
         size="lg"
-        style={{
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            transform: 'scale(1.1)',
-            backgroundColor: 'var(--mantine-color-blue-7)'
-          }
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.transform = 'scale(1.1)';
-          e.target.style.backgroundColor = 'var(--mantine-color-blue-7)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = 'scale(1)';
-          e.target.style.backgroundColor = 'var(--mantine-color-blue-6)';
-        }}
+        className="help-button"
       >
         <IconQuestionMark size={20} />
       </ActionIcon>
