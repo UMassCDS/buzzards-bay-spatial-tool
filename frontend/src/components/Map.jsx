@@ -307,7 +307,8 @@ function SensorLayerNoValues() {
 
           return L.marker([site["latitude"], site["longitude"]], {
             icon: customIcon,
-          }).bindPopup(popupText);
+          });
+          // .bindPopup(popupText);
         });
         setMarkers(siteMarkers);
       } catch (error) {
@@ -326,7 +327,7 @@ function SensorLayerNoValues() {
           position={marker.getLatLng()}
           icon={marker.options.icon}
         >
-          <Popup>{marker.getPopup().getContent()}</Popup>
+          {marker.popupContent && <Popup>{marker.popupContent}</Popup>}
         </Marker>
       ))}
     </FeatureGroup>
