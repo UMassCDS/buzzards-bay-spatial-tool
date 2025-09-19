@@ -17,20 +17,22 @@ function AnnotationInput() {
     mode: "controlled",
     initialValues: {
       type: context.currentNotes.type,
-      title: context.currentNotes.title,
-      notes: context.currentNotes.notes,
+      dataTitle: context.currentNotes.dataTitle,
+      locationRating: context.currentNotes.locationRating,
+      explanation: context.currentNotes.explanation,
     },
     validate: {
-      title: (value) => (value === "" ? "Please enter a title" : null),
-      notes: (value) => (value === "" ? "Please enter notes" : null),
+      dataTitle: (value) => (value === "" ? "Please enter a data title" : null),
+      explanation: (value) => (value === "" ? "Please enter an explanation" : null),
     },
   });
 
   useEffect(() => {
     form.setValues({
       type: context.currentNotes.type,
-      title: context.currentNotes.title,
-      notes: context.currentNotes.notes,
+      dataTitle: context.currentNotes.dataTitle,
+      locationRating: context.currentNotes.locationRating,
+      explanation: context.currentNotes.explanation,
     });
   }, [context.currentNotes]);
 
@@ -94,14 +96,26 @@ function AnnotationInput() {
             }}
           />
           <TextInput
-            {...form.getInputProps("title")}
-            label="Annotation Title"
-            placeholder="Enter a title for your annotation"
+            {...form.getInputProps("dataTitle")}
+            label="Data Title"
+            placeholder="Enter the data title"
+          />
+          <NativeSelect
+            {...form.getInputProps("locationRating")}
+            label="Location Rating (input only when directed)"
+            data={[
+              "Not applicable",
+              "Extremely",
+              "Highly",
+              "Moderately",
+              "Slightly",
+              "Minimally"
+            ]}
           />
           <Textarea
-            {...form.getInputProps("notes")}
-            label="Annotation Notes"
-            placeholder="Enter your comments about the selected region"
+            {...form.getInputProps("explanation")}
+            label="Explanation"
+            placeholder="Enter your explanation"
           />
           <Group mt="md">
             <Button type="submit" variant="outline" color="green">
