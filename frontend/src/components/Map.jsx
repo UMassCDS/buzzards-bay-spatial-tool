@@ -248,20 +248,6 @@ function BuildLegend() {
       })
       .addTo(map);
 
-    // Hacking :(
-    const legend_html = document.querySelector(".leaflet-legend-contents");
-    const column = legend_html.querySelector(".leaflet-legend-column");
-    const gradient_div = document.createElement("div");
-    gradient_div.className = "leaflet-legend-item";
-    gradient_div.innerHTML = `
-      <div style="display: flex; align-items: center;">
-        <span style="margin-right: 5px;">0</span>
-        <div style="width: 100px; height: 10px; background: linear-gradient(to right, ${RedColorGradient(
-          0
-        )}, ${RedColorGradient(1.0)}); border: 1px solid black;"></div>
-        <span style="margin-left: 5px;">1 | Sensor values</span>
-      </div>`;
-    column.appendChild(gradient_div);
     return () => {
       legend.remove();
       style.remove();
@@ -271,7 +257,7 @@ function BuildLegend() {
   return null;
 }
 
-function SensorLayerNoValues() {
+function EvenlySpacedNodes() {
   const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
@@ -297,70 +283,6 @@ function SensorLayerNoValues() {
             `Tide Station: ${site["tide_station"]}`;
 
           const color = "purple";
-          const customIcon = L.divIcon({
-            className: "custom-div-icon",
-            html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%;"></div>`,
-            iconSize: [15, 15],
-            iconAnchor: [7.5, 7.5],
-            popupAnchor: [0, -10],
-          });
-
-          return L.marker([site["latitude"], site["longitude"]], {
-            icon: customIcon,
-          }).bindPopup(popupText);
-        });
-        setMarkers(siteMarkers);
-      } catch (error) {
-        console.error("Error fetching sensor markers:", error);
-      }
-    }
-
-    fetchSensorMarkers();
-  }, []);
-
-  return (
-    <FeatureGroup>
-      {markers.map((marker, index) => (
-        <Marker
-          key={index}
-          position={marker.getLatLng()}
-          icon={marker.options.icon}
-        >
-          <Popup>{marker.getPopup().getContent()}</Popup>
-        </Marker>
-      ))}
-    </FeatureGroup>
-  );
-}
-
-function SensorLayerWithValues() {
-  const [markers, setMarkers] = useState([]);
-
-  useEffect(() => {
-    async function fetchSensorMarkers() {
-      try {
-        console.log("Fetching sensor data.");
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const sites = await response.json();
-        console.log("Fetched sensors: ", sites);
-        const siteMarkers = sites.map((site) => {
-          const popupText =
-            `SITE: ${site["site"]}\n` +
-            `Description: ${site["description"]}\n` +
-            `Tide Station: ${site["tide_station"]}\n` +
-            `Ran1: ${site["ran1"]}\n` +
-            `Ran2: ${site["ran2"]}`;
-
-          const color = RedColorGradient(site["ran1"]);
           const customIcon = L.divIcon({
             className: "custom-div-icon",
             html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%;"></div>`,
@@ -602,11 +524,8 @@ function Map() {
             </LayersControl.Overlay>
           );
         })}
-        <LayersControl.Overlay name="Sensor Locations - No Values">
-          <SensorLayerNoValues />
-        </LayersControl.Overlay>
-        <LayersControl.Overlay name="Sensor Locations - With Values ">
-          <SensorLayerWithValues />
+        <LayersControl.Overlay name="Evenly Spaced Nodess">
+          <EvenlySpacedNodes />
         </LayersControl.Overlay>
       </LayersControl>
       <FeatureGroup>
