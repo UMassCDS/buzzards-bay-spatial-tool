@@ -36,6 +36,9 @@ export async function initializeDatabase() {
        AnnotationType NVARCHAR(255),
        Title TEXT,
        Note TEXT,
+       DataTitle TEXT,
+       LocationRating NVARCHAR(50),
+       Explanation TEXT,
        FOREIGN KEY (InterviewID) REFERENCES Interview(InterviewID)
      );`,
 
@@ -52,6 +55,26 @@ export async function initializeDatabase() {
     for (const query of tableCreationQueries) {
       await pool.request().query(query);
     }
+
+    // Add new columns to existing Annotation table if they don't exist
+    const columnAdditionQueries = [
+      `IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'DataTitle')
+       ALTER TABLE Annotation ADD DataTitle TEXT;`,
+
+      `IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'LocationRating')
+       ALTER TABLE Annotation ADD LocationRating NVARCHAR(50);`,
+
+      `IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'Explanation')
+       ALTER TABLE Annotation ADD Explanation TEXT;`
+    ];
+   
+    for (const query of columnAdditionQueries) {
+      await pool.request().query(query);
+    }
+
     console.log("Database tables checked and initialized");
   } catch (error) {
     console.error("Error initializing database", error);

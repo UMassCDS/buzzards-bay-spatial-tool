@@ -18,8 +18,9 @@ const AnnotationsContextProvider = ({ children }) => {
 
   const [currentNotes, setCurrentNotes] = useState({
     type: "Area of Interest",
-    title: "",
-    notes: "",
+    dataTitle: "",
+    locationRating: "Not applicable",
+    explanation: "",
     createdAt: new Date(),
     modifiedAt: new Date(),
   });
@@ -33,8 +34,9 @@ const AnnotationsContextProvider = ({ children }) => {
     setCurrentNotes({
       index: annotation["index"],
       type: annotation["type"],
-      title: annotation["title"],
-      notes: annotation["notes"],
+      dataTitle: annotation["dataTitle"] || "",
+      locationRating: annotation["locationRating"] || "Not applicable",
+      explanation: annotation["explanation"] || "",
       createdAt: annotation["createdAt"],
       modifiedAt: annotation["modifiedAt"],
     });
@@ -76,8 +78,9 @@ const AnnotationsContextProvider = ({ children }) => {
     setUpdatingAnnotation(false);
     setCurrentNotes({
       type: "Area of Interest",
-      title: "",
-      notes: "",
+      dataTitle: "",
+      locationRating: "Not applicable",
+      explanation: "",
       createdAt: new Date(),
       modifiedAt: new Date(),
     });
