@@ -596,7 +596,7 @@ function Map() {
             </LayersControl.Overlay>
           );
         })}
-        <LayersControl.Overlay name="Evenly Spaced Nodess">
+        <LayersControl.Overlay name="Evenly Spaced Nodes">
           <EvenlySpacedNodes />
         </LayersControl.Overlay>
       </LayersControl>
