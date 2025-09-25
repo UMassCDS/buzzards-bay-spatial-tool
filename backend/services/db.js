@@ -70,36 +70,8 @@ export async function initializeDatabase() {
        WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'Explanation')
        ALTER TABLE Annotation ADD Explanation TEXT;`
     ];
-
-    // Migrate old data to new columns (but keep old columns for backwards compatibility)
-    const dataMigrationQueries = [
-      // Migrate Title to DataTitle
-      `IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'Title')
-       AND EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'DataTitle')
-       BEGIN
-         UPDATE Annotation
-         SET DataTitle = ISNULL(CAST(Title AS NVARCHAR(MAX)), '')
-         WHERE DataTitle IS NULL OR CAST(DataTitle AS NVARCHAR(MAX)) = '';
-       END`,
-
-      // Migrate Note to Explanation
-      `IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'Note')
-       AND EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'Explanation')
-       BEGIN
-         UPDATE Annotation
-         SET Explanation = ISNULL(CAST(Note AS NVARCHAR(MAX)), '')
-         WHERE Explanation IS NULL OR CAST(Explanation AS NVARCHAR(MAX)) = '';
-       END`
-
-      // NOTE: Title and Note columns are kept for backwards compatibility with main branch
-      // Drop them manually later when main branch is updated
-    ];
-
+   
     for (const query of columnAdditionQueries) {
-      await pool.request().query(query);
-    }
-
-    for (const query of dataMigrationQueries) {
       await pool.request().query(query);
     }
 
