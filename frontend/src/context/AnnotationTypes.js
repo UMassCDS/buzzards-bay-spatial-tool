@@ -4,7 +4,7 @@ const TYPES = {
   "Similar to Area of Interest": "#c23b8a",
   "Inappropriate for Monitoring Area of Interest": "#e67300",
   "Potential Sensor Locations for Network": "#ffcc00",
-  "Poor Sensor Locations for Network": "#bfbfbf"
+  "Poor Sensor Locations for Network": "#666666"
 };
 
 export default TYPES;
