@@ -65,10 +65,13 @@ app.post("/api/save", async (req, res) => {
           sql.NVarChar(128),
           annotation.type
         )
-        .input(`Title_${annotationIndex}`, sql.Text, annotation.title)
-        .input(`Note_${annotationIndex}`, sql.Text, annotation.notes)
+        .input(`Title_${annotationIndex}`, sql.Text, annotation.dataTitle || "") // For backwards compatibility
+        .input(`Note_${annotationIndex}`, sql.Text, annotation.explanation || "") // For backwards compatibility
+        .input(`DataTitle_${annotationIndex}`, sql.Text, annotation.dataTitle || "")
+        .input(`LocationRating_${annotationIndex}`, sql.NVarChar(50), annotation.locationRating || "Not applicable")
+        .input(`Explanation_${annotationIndex}`, sql.Text, annotation.explanation || "")
         .query(
-          `INSERT INTO [dbo].[Annotation] (InterviewID, StartedAt, ModifiedAt, AnnotationType, Title, Note) OUTPUT INSERTED.AnnotationID VALUES (@InterviewID_${annotationIndex}, @StartedAt_${annotationIndex}, @ModifiedAt_${annotationIndex}, @AnnotationType_${annotationIndex}, @Title_${annotationIndex}, @Note_${annotationIndex})`
+          `INSERT INTO [dbo].[Annotation] (InterviewID, StartedAt, ModifiedAt, AnnotationType, Title, Note, DataTitle, LocationRating, Explanation) OUTPUT INSERTED.AnnotationID VALUES (@InterviewID_${annotationIndex}, @StartedAt_${annotationIndex}, @ModifiedAt_${annotationIndex}, @AnnotationType_${annotationIndex}, @Title_${annotationIndex}, @Note_${annotationIndex}, @DataTitle_${annotationIndex}, @LocationRating_${annotationIndex}, @Explanation_${annotationIndex})`
         );
 
       const annotationId = annotationInsertResult.recordset[0].AnnotationID;
@@ -159,6 +162,41 @@ app.get("/data/sensor_sites", async (req, res) => {
   } catch (error) {
     console.log("Error reading sensor sites: ", error);
     res.status(500).json({ error: "Failed fetching types" });
+  }
+});
+
+// Temporary endpoint to check if interviews are being saved with new fields
+app.get("/api/interviews/test", async (req, res) => {
+  try {
+    const pool = await connectToDatabase();
+    const request = pool.request();
+
+    const result = await request.query(`
+      SELECT TOP 5
+        i.InterviewID,
+        i.IntervieweeCode,
+        i.Timestamp,
+        a.AnnotationID,
+        a.StartedAt,
+        a.ModifiedAt,
+        a.AnnotationType,
+        a.Title,
+        a.Note,
+        a.DataTitle,
+        a.LocationRating,
+        a.Explanation
+      FROM [dbo].[Interview] i
+      LEFT JOIN [dbo].[Annotation] a ON i.InterviewID = a.InterviewID
+      ORDER BY i.InterviewID DESC, a.AnnotationID
+    `);
+
+    res.json({
+      message: "Recent interview data with all fields",
+      data: result.recordset
+    });
+  } catch (error) {
+    console.error("Error fetching test interviews:", error);
+    res.status(500).json({ error: "Failed to fetch test interviews" });
   }
 });
 
