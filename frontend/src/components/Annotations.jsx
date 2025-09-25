@@ -95,6 +95,14 @@ function Annotations() {
   const handleDelete = (item, event) => {
     event.stopPropagation(); // Prevent the card click event from firing
     context.deleteFromPriorAnnotations(item);
+
+    // If we're currently viewing the deleted annotation, reset to new annotation mode
+    if (context.viewingPriorAnnotation && context.currentNotes.index === item.index) {
+      context.setViewingPriorAnnotation(false);
+      context.setEditingAnnotation(false);
+      context.resetCurrentAnnotation();
+      form.reset();
+    }
   };
 
   const handleStopViewing = () => {
