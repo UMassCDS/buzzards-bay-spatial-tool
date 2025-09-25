@@ -403,10 +403,10 @@ function PriorAnnotationsLayerByType({ hexagons }) {
       {hexagons.map((hex) => (
         <Polygon
           key={hex.id}
-          weight={1}
+          weight={2.5}
           fillOpacity={0.2}
           positions={hex.boundary}
-          pathOptions={{ color: hex.color, fillColor: hex.color, opacity: 0.2 }}
+          pathOptions={{ color: hex.color, fillColor: hex.color, opacity: 0.6 }}
         />
       ))}
     </>
@@ -420,7 +420,7 @@ function SelectionLayer({ hexagons }) {
         <Polygon
           key={hex.id}
           weight={4}
-          fillOpacity={0.2}
+          fillOpacity={0.4}
           positions={hex.boundary}
           pathOptions={{ color: hex.color, fillColor: hex.color }}
         />
