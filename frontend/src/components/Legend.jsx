@@ -54,17 +54,30 @@ function Legend({ externalTrigger = null }) {
             To begin an interview, enter the interviewee code provided by the
             researchers.
           </p>
-          <p>The left panel contains fields for entering information.</p>
           <p>
-            <strong>Annotation type</strong>: Classify the annotation.
+            The Data Panel at the left of the screen allows the user to input data.
+            Users should only enter data at the direction of the interviewer.
           </p>
           <p>
-            <strong>Annotation title</strong>: Short description of the
-            annotation and its region.
+            <strong>Select Type of Information</strong>: This dropdown menu is used
+            to select the map layer to which the data input will be added.
           </p>
           <p>
-            <strong>Annotation notes</strong>: Add details about the selected
-            region.
+            <strong>Data Title</strong>: Input a short title relevant to the data
+            being entered. The interviewer will provide guidance on what to write.
+          </p>
+          <p>
+            <strong>Location Rating</strong>: If prompted by the interviewer, select
+            the appropriate rating response to the question asked. Otherwise leave as N/A.
+          </p>
+          <p>
+            <strong>Explanation</strong>: Type in 2-3 sentences providing an
+            answer/explanation to the interviewer's question.
+          </p>
+          <p>
+            <strong>Save/Clear</strong>: Annotations will only be stored in the
+            database if the save button is pushed. Reset will clear out all
+            information typed before saving.
           </p>
           <p>
             <strong>Map modes</strong>: Use the toggle buttons on the left side of the map to switch between:
@@ -97,7 +110,7 @@ function Legend({ externalTrigger = null }) {
               <Divider my="md" color="black" />
               <Text>
                 If there is an error with the application, or you want to start the
-                interview from the beginning. Warning, this action cannot be
+                interview from the beginning. <strong><i>Warning:</i></strong> This action cannot be
                 reversed!
               </Text>
               <Button

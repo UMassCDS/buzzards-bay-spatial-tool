@@ -4,4 +4,4 @@ AnnotationTypeID,TypeDescription,Color
 2,Similar to Area of Interest,#c23b8a
 3,Inappropriate for Monitoring Area of Interest,#e67300
 4,Potential Sensor Locations for Network,#ffcc00
-5,Poor Sensor Locations for Network,#bfbfbf
+5,Poor Sensor Locations for Network,#666666
