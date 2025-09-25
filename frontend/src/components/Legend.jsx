@@ -8,7 +8,7 @@ import {
   Divider,
   Button,
 } from "@mantine/core";
-import { IconQuestionMark } from "@tabler/icons-react";
+import { IconQuestionMark, IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 
 import { AnnotationsContext } from "../context/AnnotationsContext";
@@ -66,9 +66,22 @@ function Legend({ externalTrigger = null }) {
             <strong>Annotation notes</strong>: Add details about the selected
             region.
           </p>
+          <p>
+            <strong>Map modes</strong>: Use the toggle buttons on the left side of the map to switch between:
+          </p>
+          <ul>
+            <li>
+              <IconArrowsMove size={16} color="black" /> 
+              <span><strong> Pan mode</strong>: Move and navigate around the map</span>
+            </li>
+            <li>
+              <IconHandFinger size={16} color="black" /> 
+              <span><strong> Select mode</strong>: Click hexagons to select/deselect them for annotations</span>
+            </li>
+          </ul>
           <p>To select a region on the map:</p>
-          <ul style={{ marginLeft: "20px" }}>
-            <li>Click individual hexagons to select/deselect them</li>
+          <ul>
+            <li>Switch to Select mode, then click individual hexagons to select/deselect them</li>
             <li>Use multi-select mode to quickly highlight larger areas</li>
             <li>
               Click the hexagon icon in the top-left to draw custom polygons by

@@ -579,41 +579,50 @@ function Map() {
       <div
         style={{
           position: "absolute",
-          top: "10px",
-          left: "50px",
-          zIndex: 1000,
+          top: "158px",
+          left: "10px",
+          zIndex: 99,
           backgroundColor: "white",
-          borderRadius: "6px",
-          padding: "8px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+          borderRadius: "4px",
+          border: "2px solid rgba(128, 128, 128, 0.5)",
+          display: "flex",
+          flexDirection: "column",
+          width: "33px",
         }}
       >
-        <Group gap="xs" align="center">
-          <Text size="sm" fw={500}>
-            Mode:
-          </Text>
-          <ActionIcon
-            variant={mapMode === "pan" ? "filled" : "outline"}
-            color={mapMode === "pan" ? "blue" : "gray"}
-            size="sm"
-            onClick={() => setMapMode("pan")}
-            title="Pan Mode - Move the map around"
-          >
-            <IconArrowsMove size={16} />
-          </ActionIcon>
-          <ActionIcon
-            variant={mapMode === "select" ? "filled" : "outline"}
-            color={mapMode === "select" ? "green" : "gray"}
-            size="sm"
-            onClick={() => setMapMode("select")}
-            title="Select Mode - Click to add/remove hexagons"
-          >
-            <IconHandFinger size={16} />
-          </ActionIcon>
-          <Text size="xs" c={mapMode === "pan" ? "blue" : "green"}>
-            {mapMode === "pan" ? "Pan" : "Select"}
-          </Text>
-        </Group>
+        <ActionIcon
+          variant={mapMode === "pan" ? "filled" : "light"}
+          color={mapMode === "pan" ? "blue" : "gray"}
+          size="lg"
+          onClick={() => setMapMode("pan")}
+          title="Pan Mode - Move the map around"
+          style={{
+            borderRadius: "2px",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
+            width: "100%",
+            height: "29px",
+            minWidth: "29px",
+            minHeight: "29px",
+          }}
+        >
+          <IconArrowsMove size={16} />
+        </ActionIcon>
+        <ActionIcon
+          variant={mapMode === "select" ? "filled" : "light"}
+          color={mapMode === "select" ? "green" : "gray"}
+          size="lg"
+          onClick={() => setMapMode("select")}
+          title="Select Mode - Click to add/remove hexagons"
+          style={{
+            borderRadius: "2px",
+            width: "100%",
+            height: "29px",
+            minWidth: "29px",
+            minHeight: "29px",
+          }}
+        >
+          <IconHandFinger size={16} />
+        </ActionIcon>
       </div>
 
       <MapContainer
