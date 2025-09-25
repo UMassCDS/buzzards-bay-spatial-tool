@@ -295,7 +295,8 @@ function EvenlySpacedNodes() {
 
           return L.marker([site["latitude"], site["longitude"]], {
             icon: customIcon,
-          }).bindPopup(popupText);
+          });
+          // .bindPopup(popupText);
         });
         setMarkers(siteMarkers);
       } catch (error) {
