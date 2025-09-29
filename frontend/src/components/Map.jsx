@@ -138,7 +138,7 @@ function BuildLegend() {
 
   if (context.sensorDataVisible) {
     sensorSymbols.push({
-      label: "Sensor locations",
+      label: "Evenly Spaced Nodes",
       type: "circle",
       radius: 6,
       color: "purple",
