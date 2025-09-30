@@ -277,12 +277,12 @@ function EvenlySpacedNodes() {
         );
 
         const sites = await response.json();
-        console.log("Fetched sensors, for no value: ", sites);
+        console.log("Fetched evenly spaced nodes: ", sites);
         const siteMarkers = sites.map((site) => {
-          const popupText =
-            `SITE: ${site["site"]}\n` +
-            `Description: ${site["description"]}\n` +
-            `Tide Station: ${site["tide_station"]}`;
+          // const popupText =
+          //   `SITE: ${site["site"]}\n` +
+          //   `Description: ${site["description"]}\n` +
+          //   `Tide Station: ${site["tide_station"]}`;
 
           const color = "purple";
           const customIcon = L.divIcon({
