@@ -15,6 +15,7 @@ import {
   Textarea,
   Blockquote,
   Highlight,
+  ColorInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
@@ -164,6 +165,20 @@ function Annotations() {
                 context.setCurrentNotes(updatedNotes);
               }}
             />
+            {form.values.type === "Custom" && (
+              <ColorInput
+                label="Custom Color"
+                placeholder="Enter hex color"
+                format="hex"
+                value={context.annotationTypes["Custom"]}
+                disabled={
+                  context.viewingPriorAnnotation && !context.editingAnnotation
+                }
+                onChange={(color) => {
+                  context.updateCustomColor(color);
+                }}
+              />
+            )}
             <TextInput
               {...form.getInputProps("dataTitle")}
               label="Data Title"

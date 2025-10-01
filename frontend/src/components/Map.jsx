@@ -427,7 +427,7 @@ function Map() {
       type: context.currentNotes.type,
     });
     setHexagonsBoundaries(newHexagonsBoundaries);
-  }, [selectedHexagons, context.currentNotes.type]);
+  }, [selectedHexagons, context.currentNotes.type, context.annotationTypes]);
 
   useEffect(() => {
     // console.log(context.priorAnnotations);

@@ -101,6 +101,13 @@ const AnnotationsContextProvider = ({ children }) => {
     );
   };
 
+  const updateCustomColor = (color) => {
+    setAnnotationTypes((prevTypes) => ({
+      ...prevTypes,
+      Custom: color,
+    }));
+  };
+
   const saveInterview = async () => {
     const interview = {};
     interview.intervieweeId = intervieweeId;
@@ -238,6 +245,7 @@ const AnnotationsContextProvider = ({ children }) => {
         addToPriorAnnotations,
         updatePriorAnnotations,
         deleteFromPriorAnnotations,
+        updateCustomColor,
       }}
     >
       {children}
