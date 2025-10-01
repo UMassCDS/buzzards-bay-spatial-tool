@@ -17,7 +17,7 @@ const AnnotationsContextProvider = ({ children }) => {
   const [sensorLocationsVisible, setSensorLocationsVisible] = useState(true);
 
   const [currentNotes, setCurrentNotes] = useState({
-    type: "Area of Interest",
+    type: "Area of Importance",
     dataTitle: "",
     locationRating: "Not applicable",
     explanation: "",
@@ -77,7 +77,7 @@ const AnnotationsContextProvider = ({ children }) => {
   const resetCurrentAnnotation = () => {
     setUpdatingAnnotation(false);
     setCurrentNotes({
-      type: "Area of Interest",
+      type: "Area of Importance",
       dataTitle: "",
       locationRating: "Not applicable",
       explanation: "",
