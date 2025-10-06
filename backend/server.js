@@ -127,48 +127,30 @@ app.get("/data/annotation_types", async (req, res) => {
 
 app.get("/data/sensor_sites", async (req, res) => {
   try {
-    const filePath = "./data/example_sites/sites.json";
+
+    const filePath = "./data/sites/EastCoastPoint_2km.csv";
     const data = await promises.readFile(filePath, "utf-8");
-    const jsonData = JSON.parse(data);
+
+    // Parse CSV data
+    const lines = data.trim().split('\n');
+    const headers = lines[0].split(',');
+
+    // Convert CSV to JSON array
+    const jsonData = lines.slice(1).map((line, index) => {
+      const values = line.split(',');
+      return {
+        site: `Site ${index + 1}`,
+        latitude: parseFloat(values[2]), // POINT_Y
+        longitude: parseFloat(values[1]), // POINT_X
+        description: `Evenly spaced node ${index + 1}`,
+        tide_station: "N/A"
+      };
+    });
+
     res.json(jsonData);
   } catch (error) {
     console.log("Error reading sensor sites: ", error);
-    res.status(500).json({ error: "Failed fetching types" });
-  }
-});
-
-// Temporary endpoint to check if interviews are being saved with new fields
-app.get("/api/interviews/test", async (req, res) => {
-  try {
-    const pool = await connectToDatabase();
-    const request = pool.request();
-
-    const result = await request.query(`
-      SELECT TOP 5
-        i.InterviewID,
-        i.IntervieweeCode,
-        i.Timestamp,
-        a.AnnotationID,
-        a.StartedAt,
-        a.ModifiedAt,
-        a.AnnotationType,
-        a.Title,
-        a.Note,
-        a.DataTitle,
-        a.LocationRating,
-        a.Explanation
-      FROM [dbo].[Interview] i
-      LEFT JOIN [dbo].[Annotation] a ON i.InterviewID = a.InterviewID
-      ORDER BY i.InterviewID DESC, a.AnnotationID
-    `);
-
-    res.json({
-      message: "Recent interview data with all fields",
-      data: result.recordset
-    });
-  } catch (error) {
-    console.error("Error fetching test interviews:", error);
-    res.status(500).json({ error: "Failed to fetch test interviews" });
+    res.status(500).json({ error: "Failed fetching sensor sites" });
   }
 });
 
