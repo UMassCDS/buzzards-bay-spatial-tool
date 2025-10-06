@@ -41,7 +41,6 @@ app.post("/api/save", async (req, res) => {
       interviewInsertResult.recordset[0].InterviewID
     );
     const interviewId = interviewInsertResult.recordset[0].InterviewID;
-    // console.log(interview.annotations);
 
     // Gotta do unique names for the parameters for EACH entry
     for (const [
@@ -92,34 +91,6 @@ app.post("/api/save", async (req, res) => {
           console.log("Hexagons batch inserted");
         }
       }
-
-      // if (annotation.annotationHexes?.length > 0) {
-      //   const hexValues = annotation.annotationHexes
-      //     .map((hex) => `(${annotationId}, '${hex}')`)
-      //     .join(",");
-
-      //   await request.query(
-      //     `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES ${hexValues}`
-      //   );
-
-      //   console.log("Hexagons inserted");
-      // }
-
-      // for (const [index, h3Id] of (
-      //   annotation.annotationHexes || []
-      // ).entries()) {
-      //   await request
-      //     .input(
-      //       `AnnotationID_${annotationIndex}_${index}`,
-      //       sql.Int,
-      //       annotationId
-      //     )
-      //     .input(`H3ID_${annotationIndex}_${index}`, sql.NVarChar(255), h3Id)
-      //     .query(
-      //       `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES (@AnnotationID_${annotationIndex}_${index}, @H3ID_${annotationIndex}_${index})`
-      //     );
-      // }
-      // console.log("Hexagons inserted");
     }
 
     await transaction.commit();
@@ -156,7 +127,8 @@ app.get("/data/annotation_types", async (req, res) => {
 app.get("/data/sensor_sites", async (req, res) => {
   try {
 
-    const filePath = "./data/sites/EastCoastPoint_2km.csv";
+    // const filePath = "./data/sites/EastCoastPoint_2km.csv";
+    const filePath = "./data/example_sites/sites.csv"
     const data = await promises.readFile(filePath, "utf-8");
 
     // Parse CSV data

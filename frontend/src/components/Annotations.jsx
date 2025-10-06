@@ -18,8 +18,7 @@ import {
   ColorInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useForm } from "@mantine/form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useContext } from "react";
 import { AnnotationsContext } from "../context/AnnotationsContext";
@@ -32,42 +31,48 @@ function Annotations() {
   const context = useContext(AnnotationsContext);
   const [oldAnnotation, setOldAnnotation] = useState(null);
 
-  const form = useForm({
-    mode: "controlled",
-    initialValues: {
-      type: context.currentNotes.type,
-      dataTitle: context.currentNotes.dataTitle,
-      locationRating: context.currentNotes.locationRating,
-      explanation: context.currentNotes.explanation,
-    },
-    validate: {
-      dataTitle: (value) => (value === "" ? "Please enter a data title" : null),
-      explanation: (value) =>
-        value === "" ? "Please enter an explanation" : null,
-    },
-  });
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const handleSubmit = (formValues) => {
-    const updatedAnnotation = {
-      ...context.currentNotes,
-      ...formValues,
-      annotationHexes: context.currentHexes,
-    };
+    // Validate
+    const errors = {};
+    if (!context.currentNotes.dataTitle) {
+      errors.dataTitle = "Please enter a data title";
+    }
+    if (!context.currentNotes.explanation) {
+      errors.explanation = "Please enter an explanation";
+    }
 
-    updatedAnnotation.modifiedAt = new Date();
-
-    // console.log(updatedAnnotation);
+    if (Object.keys(errors).length > 0) {
+      Object.values(errors).forEach((error) => alert(error));
+      return;
+    }
 
     if (context.currentHexes.length === 0) {
       alert("Please select a region first, at least one hex is required.");
       return;
     }
 
+    const updatedAnnotation = {
+      ...context.currentNotes,
+      annotationHexes: context.currentHexes,
+    };
+
+    updatedAnnotation.modifiedAt = new Date();
+
     context.updatePriorAnnotations(updatedAnnotation);
     context.resetCurrentAnnotation();
     context.setEditingAnnotation(false);
     context.setUpdatingAnnotation(false);
     context.setViewingPriorAnnotation(false);
+  };
+
+  const handleFieldChange = (field, value) => {
+    const updatedNotes = {
+      ...context.currentNotes,
+      [field]: value,
+    };
+    context.setCurrentNotes(updatedNotes);
   };
 
   const sortByAnnotationType = (a, b) => {
@@ -85,8 +90,6 @@ function Annotations() {
       alert("Please save or cancel current editing annotation.");
       return;
     }
-
-    console.log(item);
 
     context.setViewingPriorAnnotation(true);
     context.setCurrentAnnotation(item);
@@ -106,7 +109,6 @@ function Annotations() {
       context.setViewingPriorAnnotation(false);
       context.setEditingAnnotation(false);
       context.resetCurrentAnnotation();
-      form.reset();
     }
   };
 
@@ -114,34 +116,17 @@ function Annotations() {
     context.setViewingPriorAnnotation(false);
     context.setEditingAnnotation(false);
     context.resetCurrentAnnotation();
-    form.reset();
   };
 
   const handleCancelEdit = () => {
-    console.log(oldAnnotation);
     context.setCurrentAnnotation(oldAnnotation);
     context.setEditingAnnotation(false);
     setOldAnnotation(null);
   };
 
-  useEffect(() => {
-    form.setValues({
-      type: context.currentNotes.type,
-      dataTitle: context.currentNotes.dataTitle,
-      locationRating: context.currentNotes.locationRating,
-      explanation: context.currentNotes.explanation,
-    });
-  }, [
-    context.currentNotes.type,
-    context.currentNotes.dataTitle,
-    context.currentNotes.locationRating,
-    context.currentNotes.explanation,
-    form,
-  ]);
-
   return (
     <>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
+      <form onSubmit={handleSubmit}>
         <Fieldset legend="Data Input Panel">
           <Stack gap="sm">
             {context.viewingPriorAnnotation && (
@@ -157,7 +142,7 @@ function Annotations() {
               </Blockquote>
             )}
             <NativeSelect
-              {...form.getInputProps("type")}
+              value={context.currentNotes.type}
               withAsterisk
               label="Select Type of Information"
               data={Object.keys(context.annotationTypes)}
@@ -165,17 +150,10 @@ function Annotations() {
                 context.viewingPriorAnnotation && !context.editingAnnotation
               }
               onChange={(event) => {
-                form.setFieldValue("type", event.currentTarget.value);
-                const updatedNotes = {
-                  ...context.currentNotes,
-                  ...form.values,
-                  type: event.currentTarget.value,
-                };
-
-                context.setCurrentNotes(updatedNotes);
+                handleFieldChange("type", event.currentTarget.value);
               }}
             />
-            {form.values.type === "Custom" && (
+            {context.currentNotes.type === "Custom" && (
               <ColorInput
                 label="Custom Color"
                 placeholder="Enter hex color"
@@ -190,15 +168,18 @@ function Annotations() {
               />
             )}
             <TextInput
-              {...form.getInputProps("dataTitle")}
+              value={context.currentNotes.dataTitle}
               label="Data Title"
               placeholder="Enter the data title"
               disabled={
                 context.viewingPriorAnnotation && !context.editingAnnotation
               }
+              onChange={(event) =>
+                handleFieldChange("dataTitle", event.currentTarget.value)
+              }
             />
             <NativeSelect
-              {...form.getInputProps("locationRating")}
+              value={context.currentNotes.locationRating}
               label="Location Rating (input only when directed)"
               data={[
                 "Not applicable",
@@ -211,13 +192,19 @@ function Annotations() {
               disabled={
                 context.viewingPriorAnnotation && !context.editingAnnotation
               }
+              onChange={(event) =>
+                handleFieldChange("locationRating", event.currentTarget.value)
+              }
             />
             <Textarea
-              {...form.getInputProps("explanation")}
+              value={context.currentNotes.explanation}
               label="Explanation"
               placeholder="Enter your explanation"
               disabled={
                 context.viewingPriorAnnotation && !context.editingAnnotation
+              }
+              onChange={(event) =>
+                handleFieldChange("explanation", event.currentTarget.value)
               }
             />
             <Group mt="md">
@@ -344,22 +331,3 @@ function Annotations() {
 }
 
 export default Annotations;
-
-// const handleCardClick = (item) => {
-//   console.log("Clicked, updating: ", context.updatingAnnotation);
-//   if (context.updatingAnnotation) {
-//     alert("Please save or cancel current updating annotation.");
-//     return;
-//   }
-
-//   context.setUpdatingAnnotation(true);
-//   item.modifiedAt = new Date();
-//   context.setCurrentAnnotation(item);
-
-//   context.deleteFromPriorAnnotations(item);
-// };
-
-// const handleDelete = (item, event) => {
-//   event.stopPropagation(); // Prevent the card click event from firing
-//   context.deleteFromPriorAnnotations(item);
-// };
