@@ -7,6 +7,7 @@ import {
   Button,
   TextInput,
   Stack,
+  ColorInput,
 } from "@mantine/core";
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import { useContext, useEffect } from "react";
@@ -95,6 +96,17 @@ function AnnotationInput() {
               context.setCurrentNotes(updatedNotes);
             }}
           />
+          {form.values.type === "Custom" && (
+            <ColorInput
+              label="Custom Color"
+              placeholder="Enter hex color"
+              format="hex"
+              value={context.annotationTypes["Custom"]}
+              onChange={(color) => {
+                context.updateCustomColor(color);
+              }}
+            />
+          )}
           <TextInput
             {...form.getInputProps("dataTitle")}
             label="Data Title"

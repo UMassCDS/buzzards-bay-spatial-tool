@@ -17,7 +17,7 @@ const AnnotationsContextProvider = ({ children }) => {
   const [sensorLocationsVisible, setSensorLocationsVisible] = useState(true);
 
   const [currentNotes, setCurrentNotes] = useState({
-    type: "Area of Interest",
+    type: "Area of Importance",
     dataTitle: "",
     locationRating: "Not applicable",
     explanation: "",
@@ -77,7 +77,7 @@ const AnnotationsContextProvider = ({ children }) => {
   const resetCurrentAnnotation = () => {
     setUpdatingAnnotation(false);
     setCurrentNotes({
-      type: "Area of Interest",
+      type: "Area of Importance",
       dataTitle: "",
       locationRating: "Not applicable",
       explanation: "",
@@ -99,6 +99,13 @@ const AnnotationsContextProvider = ({ children }) => {
     setPriorAnnotations(
       [...priorAnnotations].filter((value) => annotation.index !== value.index)
     );
+  };
+
+  const updateCustomColor = (color) => {
+    setAnnotationTypes((prevTypes) => ({
+      ...prevTypes,
+      Custom: color,
+    }));
   };
 
   const saveInterview = async () => {
@@ -238,6 +245,7 @@ const AnnotationsContextProvider = ({ children }) => {
         addToPriorAnnotations,
         updatePriorAnnotations,
         deleteFromPriorAnnotations,
+        updateCustomColor,
       }}
     >
       {children}
