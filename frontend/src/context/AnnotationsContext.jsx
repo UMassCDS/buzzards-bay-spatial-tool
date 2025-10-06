@@ -1,9 +1,9 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
 import TYPES from "./AnnotationTypes";
 
 const AnnotationsContext = createContext();
 
-// eslint-disable-next-line react/prop-types
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState(TYPES);
   const [priorAnnotations, setPriorAnnotations] = useState([]);
@@ -53,8 +53,6 @@ const AnnotationsContextProvider = ({ children }) => {
   };
 
   const updatePriorAnnotations = (annotation) => {
-    console.log(annotation);
-    console.log(priorAnnotations);
     if (Object.keys(annotation).includes("index")) {
       const existingAnnotation = priorAnnotations.find(
         (prior) => prior.index === annotation.index
@@ -112,10 +110,7 @@ const AnnotationsContextProvider = ({ children }) => {
     const interview = {};
     interview.intervieweeId = intervieweeId;
     interview.annotations = priorAnnotations;
-    console.log(interview);
     try {
-      console.log("Saving interview");
-      console.log(`${import.meta.env.VITE_BACKEND_IP}/api/save`);
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_IP}/api/save`,
         {
@@ -140,51 +135,29 @@ const AnnotationsContextProvider = ({ children }) => {
     }
   };
 
-  const saveStateToStorage = () => {
+  const saveStateToStorage = useCallback(() => {
     const state = {
       priorAnnotations,
       currentIndex,
-      // currentNotes,
       intervieweeId,
-      // currentHexes,
     };
     localStorage.setItem("annotationsState", JSON.stringify(state));
-  };
+  }, [priorAnnotations, currentIndex, intervieweeId]);
 
   const clearStateFromStorage = () => {
     localStorage.removeItem("annotationsState");
   };
 
   useEffect(() => {
-    console.log(`Backend: ${import.meta.env.VITE_BACKEND_IP}`);
-    fetch(`${import.meta.env.VITE_BACKEND_IP}`).then((response) =>
-      console.log("Connection: ", response.status)
-    );
-
     const loadStateFromStorage = async () => {
       const savedState = localStorage.getItem("annotationsState");
       if (savedState) {
-        const {
-          priorAnnotations,
-          currentIndex,
-          // currentNotes,
-          intervieweeId,
-          // currentHexes,
-        } = JSON.parse(savedState);
+        const { priorAnnotations, currentIndex, intervieweeId } =
+          JSON.parse(savedState);
 
         setPriorAnnotations(priorAnnotations || []);
         setCurrentIndex(currentIndex || 0);
-        // setCurrentNotes(
-        //   currentNotes || {
-        //     type: "Area of Interest",
-        //     title: "",
-        //     notes: "",
-        //     createdAt: new Date(),
-        //     modifiedAt: new Date(),
-        //   }
-        // );
         setIntervieweeId(intervieweeId || "");
-        // setCurrentHexes(currentHexes || []);
       }
       setIsInitialized(true);
     };
@@ -202,6 +175,8 @@ const AnnotationsContextProvider = ({ children }) => {
     currentIndex,
     intervieweeId,
     currentHexes,
+    isInitialized,
+    saveStateToStorage,
   ]);
 
   const resetInterview = () => {
@@ -251,6 +226,9 @@ const AnnotationsContextProvider = ({ children }) => {
       {children}
     </AnnotationsContext.Provider>
   );
+};
+AnnotationsContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export { AnnotationsContextProvider, AnnotationsContext };

@@ -18,16 +18,14 @@ import L from "leaflet";
 import "@gnatih/leaflet.legend";
 import * as h3 from "h3-js";
 import { useEffect, useState, useContext } from "react";
-import { ActionIcon, Group, Text } from "@mantine/core";
+import { ActionIcon } from "@mantine/core";
 import { IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
 
-import { RedColorGradient } from "../util/ColorPicker.js";
 import { AnnotationsContext } from "../context/AnnotationsContext";
 
 window.type = true;
 
 const HEX_RESOLUTION = 10;
-const SENSOR_DATA_PATH = "../../data/example_sites/sites.json";
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -39,87 +37,6 @@ L.drawLocal.draw.handlers.polygon.tooltip.cont =
   "Continue drawing the shape for ADDING annotation hexagons";
 L.drawLocal.draw.handlers.polygon.tooltip.end =
   "Click the first point to finish drawing and fill the shape with hexagons";
-
-// function BuildLegend() {
-//   const context = useContext(AnnotationsContext);
-
-//   const hexTypeSymbols = Object.keys(context.annotationTypes).map((type) => ({
-//     label: type,
-//     type: "polygon",
-//     sides: 6,
-//     color: context.annotationTypes[type],
-//     fillColor: context.annotationTypes[type],
-//     fillOpacity: 0.2,
-//     weight: 2,
-//   }));
-
-//   const sensorSymbols = [];
-
-//   if (context.sensorDataVisible) {
-//     sensorSymbols.push({
-//       label: "Sensor locations",
-//       type: "circle",
-//       radius: 6,
-//       color: "purple",
-//       fillColor: "purple",
-//       weight: 1,
-//     });
-//   }
-
-//   if (context.sensorLocationsVisible) {
-//     sensorSymbols.push({
-//       label: "Sensor Values",
-//       type: "rectangle",
-//       html: `<div style="width: 100px; height: 10px; background: linear-gradient(to right, ${RedColorGradient(
-//         0
-//       )}, ${RedColorGradient(1.0)});"></div>`,
-//       weight: 1,
-//     });
-//   }
-
-//   const map = useMap();
-//   useEffect(() => {
-//     const style = document.createElement("style");
-//     style.textContent = `
-//         .leaflet-legend-title {
-//           display: none;
-//         }
-//         .leaflet-legend-contents {
-//           display: flex;
-//           flex-direction: column; /* Changed to column for better layout */
-//           gap: 5px;
-//         }
-//         .leaflet-legend-column {
-//           flex: 1;
-//         }
-//         .leaflet-legend-item {
-//           margin-bottom: 3px;
-//           font-size: 10px;
-//         }
-//         .leaflet-legend-item div {
-//           border: 1px solid black; /* Optional: Add border to the gradient bar */
-//         }`;
-//     document.head.appendChild(style);
-
-//     const legend = L.control
-//       .Legend({
-//         position: "bottomright",
-//         collapsed: false,
-//         symbolWidth: 20,
-//         opacity: 1,
-//         column: 2,
-//         legends: [...hexTypeSymbols, ...sensorSymbols],
-//       })
-//       .addTo(map);
-
-//     return () => {
-//       legend.remove();
-//       style.remove();
-//     };
-//   }, []);
-
-//   return null;
-// }
 
 function BuildLegend() {
   const context = useContext(AnnotationsContext);
@@ -145,76 +62,6 @@ function BuildLegend() {
       fillColor: "purple",
       weight: 1,
     });
-  }
-
-  if (context.sensorLocationsVisible) {
-    sensorSymbols.push(
-      ...[
-        // {
-        //   label: "Sensor with value [0]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(0),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-        // {
-        //   label: "Sensor with value [0.33]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(0.33),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-        // {
-        //   label: "Sensor with value [0.66]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(0.66),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-        // {
-        //   label: "Sensor with value [0.25]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(0.25),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-        // {
-        //   label: "Sensor with value [0.5]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(0.5),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-        // {
-        //   label: "Sensor with value [0.75]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(0.75),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-        // {
-        //   label: "Sensor with value [1.0]",
-        //   type: "circle",
-        //   radius: 6,
-        //   color: "black",
-        //   fillColor: RedColorGradient(1.0),
-        //   fillOpacity: 1.0,
-        //   weight: 1,
-        // },
-      ]
-    );
   }
 
   const map = useMap();
@@ -254,6 +101,7 @@ function BuildLegend() {
       legend.remove();
       style.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;
@@ -277,13 +125,8 @@ function EvenlySpacedNodes() {
         );
 
         const sites = await response.json();
-        console.log("Fetched sensors, for no value: ", sites);
+        console.log("Fetched sensors", sites);
         const siteMarkers = sites.map((site) => {
-          const popupText =
-            `SITE: ${site["site"]}\n` +
-            `Description: ${site["description"]}\n` +
-            `Tide Station: ${site["tide_station"]}`;
-
           const color = "purple";
           const customIcon = L.divIcon({
             className: "custom-div-icon",
@@ -296,7 +139,6 @@ function EvenlySpacedNodes() {
           return L.marker([site["latitude"], site["longitude"]], {
             icon: customIcon,
           });
-          // .bindPopup(popupText);
         });
         setMarkers(siteMarkers);
       } catch (error) {
@@ -380,10 +222,10 @@ const MapController = ({ mapMode }) => {
   useEffect(() => {
     if (mapMode === "select") {
       map.dragging.disable();
-      map.getContainer().style.cursor = 'crosshair';
+      map.getContainer().style.cursor = "crosshair";
     } else {
       map.dragging.enable();
-      map.getContainer().style.cursor = '';
+      map.getContainer().style.cursor = "";
     }
   }, [map, mapMode]);
 
@@ -427,11 +269,10 @@ function Map() {
       type: context.currentNotes.type,
     });
     setHexagonsBoundaries(newHexagonsBoundaries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHexagons, context.currentNotes.type, context.annotationTypes]);
 
   useEffect(() => {
-    // console.log(context.priorAnnotations);
-    // console.log(context.currentNotes);
     let priorsWithoutCurrent;
     if (context.viewingPriorAnnotation) {
       priorsWithoutCurrent = context.priorAnnotations.filter(
@@ -441,7 +282,6 @@ function Map() {
       priorsWithoutCurrent = context.priorAnnotations;
     }
 
-    // console.log(priorsWithoutCurrent);
     const hexs = priorsWithoutCurrent.flatMap((annotation) =>
       Object.keys(context.annotationTypes).length > 0
         ? h3IDsToGeoBoundary({
@@ -451,6 +291,7 @@ function Map() {
         : []
     );
     setPriorAnnotations(hexs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context.priorAnnotations, context.annotationTypes, context.currentNotes]);
 
   const onAddSelectionHexagon = (hexagonID) => {
@@ -478,6 +319,7 @@ function Map() {
       setSelectedHexagons(leftOver);
       context.setCurrentHexes(leftOver);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [multiSelectHexagons]);
 
   const handleMultiSelect = (e) => {
@@ -553,77 +395,77 @@ function Map() {
         zoom={11}
         style={{ height: "80vh", width: "100%", zIndex: 0 }}
       >
-      <MapController mapMode={mapMode} />
-      <BuildLegend />
-      <LayersControl position="topright">
-        <LayersControl.BaseLayer checked name="OpenStreetMap">
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-        </LayersControl.BaseLayer>
-        <LayersControl.BaseLayer name="World Light Gray Base">
-          <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-            attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
-          />
-        </LayersControl.BaseLayer>
-        <LayersControl.BaseLayer name="World Imagery">
-          <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution='&copy; <a href="https://www.arcgis.com/">ArcGIS</a>'
-          />
-        </LayersControl.BaseLayer>
-        <LayersControl.Overlay checked name="Current Annotation">
-          <FeatureGroup>
-            <SelectionLayer hexagons={hexagonsBoundaries} />
-          </FeatureGroup>
-        </LayersControl.Overlay>
-        r
-        {Object.keys(context.annotationTypes).map((type) => {
-          const filteredHexagons = priorAnnotations.filter(
-            (annotation) => annotation.type === type
-          );
-          return (
-            <LayersControl.Overlay
-              key={type}
-              checked
-              name={`${type} - Annotations`}
-            >
-              <FeatureGroup>
-                <PriorAnnotationsLayerByType hexagons={filteredHexagons} />
-              </FeatureGroup>
-            </LayersControl.Overlay>
-          );
-        })}
-        <LayersControl.Overlay name="Evenly Spaced Nodes">
-          <EvenlySpacedNodes />
-        </LayersControl.Overlay>
-      </LayersControl>
-      <FeatureGroup>
-        {(!context.viewingPriorAnnotation || context.editingAnnotation) && (
-          <EditControl
-            position="topleft"
-            onCreated={handleMultiSelect}
-            draw={{
-              rectangle: true,
-              polygon: true,
-              circle: false,
-              polyline: false,
-              marker: false,
-              circlemarker: false,
-            }}
-            edit={{
-              edit: false,
-              remove: false,
-            }}
-          />
+        <MapController mapMode={mapMode} />
+        <BuildLegend />
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="OpenStreetMap">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="World Light Gray Base">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="World Imagery">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; <a href="https://www.arcgis.com/">ArcGIS</a>'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.Overlay checked name="Current Annotation">
+            <FeatureGroup>
+              <SelectionLayer hexagons={hexagonsBoundaries} />
+            </FeatureGroup>
+          </LayersControl.Overlay>
+          r
+          {Object.keys(context.annotationTypes).map((type) => {
+            const filteredHexagons = priorAnnotations.filter(
+              (annotation) => annotation.type === type
+            );
+            return (
+              <LayersControl.Overlay
+                key={type}
+                checked
+                name={`${type} - Annotations`}
+              >
+                <FeatureGroup>
+                  <PriorAnnotationsLayerByType hexagons={filteredHexagons} />
+                </FeatureGroup>
+              </LayersControl.Overlay>
+            );
+          })}
+          <LayersControl.Overlay name="Evenly Spaced Nodes">
+            <EvenlySpacedNodes />
+          </LayersControl.Overlay>
+        </LayersControl>
+        <FeatureGroup>
+          {(!context.viewingPriorAnnotation || context.editingAnnotation) && (
+            <EditControl
+              position="topleft"
+              onCreated={handleMultiSelect}
+              draw={{
+                rectangle: true,
+                polygon: true,
+                circle: false,
+                polyline: false,
+                marker: false,
+                circlemarker: false,
+              }}
+              edit={{
+                edit: false,
+                remove: false,
+              }}
+            />
+          )}
+        </FeatureGroup>
+        {mapMode === "select" && (
+          <ClickHandler onAddSelectionHexagon={onAddSelectionHexagon} />
         )}
-      </FeatureGroup>
-      {mapMode === "select" && (
-        <ClickHandler onAddSelectionHexagon={onAddSelectionHexagon} />
-      )}
-    </MapContainer>
+      </MapContainer>
     </div>
   );
 }

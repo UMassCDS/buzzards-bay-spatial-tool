@@ -34,11 +34,11 @@ export async function initializeDatabase() {
        StartedAt DATETIME,
        ModifiedAt DATETIME,
        AnnotationType NVARCHAR(255),
-       Title TEXT,
-       Note TEXT,
-       DataTitle TEXT,
+       Title NVARCHAR(MAX),
+       Note NVARCHAR(MAX),
+       DataTitle NVARCHAR(MAX),
        LocationRating NVARCHAR(50),
-       Explanation TEXT,
+       Explanation NVARCHAR(MAX),
        FOREIGN KEY (InterviewID) REFERENCES Interview(InterviewID)
      );`,
 
@@ -46,7 +46,7 @@ export async function initializeDatabase() {
     `IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hexagon' AND xtype='U')
      CREATE TABLE Hexagon (
        AnnotationID INT,
-       H3ID TEXT,
+       H3ID NVARCHAR(MAX),
        FOREIGN KEY (AnnotationID) REFERENCES Annotation(AnnotationID)
      );`,
   ];
@@ -60,7 +60,7 @@ export async function initializeDatabase() {
     const columnAdditionQueries = [
       `IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
        WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'DataTitle')
-       ALTER TABLE Annotation ADD DataTitle TEXT;`,
+       ALTER TABLE Annotation ADD DataTitle NVARCHAR(MAX);`,
 
       `IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
        WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'LocationRating')
@@ -68,7 +68,7 @@ export async function initializeDatabase() {
 
       `IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
        WHERE TABLE_NAME = 'Annotation' AND COLUMN_NAME = 'Explanation')
-       ALTER TABLE Annotation ADD Explanation TEXT;`
+       ALTER TABLE Annotation ADD Explanation NVARCHAR(MAX);`
     ];
    
     for (const query of columnAdditionQueries) {

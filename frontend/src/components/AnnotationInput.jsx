@@ -1,4 +1,3 @@
-import { useForm } from "@mantine/form";
 import {
   Fieldset,
   NativeSelect,
@@ -10,66 +9,67 @@ import {
   ColorInput,
 } from "@mantine/core";
 import { AnnotationsContext } from "../context/AnnotationsContext";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 
 function AnnotationInput() {
   const context = useContext(AnnotationsContext);
-  const form = useForm({
-    mode: "controlled",
-    initialValues: {
-      type: context.currentNotes.type,
-      dataTitle: context.currentNotes.dataTitle,
-      locationRating: context.currentNotes.locationRating,
-      explanation: context.currentNotes.explanation,
-    },
-    validate: {
-      dataTitle: (value) => (value === "" ? "Please enter a data title" : null),
-      explanation: (value) => (value === "" ? "Please enter an explanation" : null),
-    },
-  });
 
-  useEffect(() => {
-    form.setValues({
-      type: context.currentNotes.type,
-      dataTitle: context.currentNotes.dataTitle,
-      locationRating: context.currentNotes.locationRating,
-      explanation: context.currentNotes.explanation,
-    });
-  }, [context.currentNotes]);
+  const validate = {
+    dataTitle: (value) => (value === "" ? "Please enter a data title" : null),
+    explanation: (value) =>
+      value === "" ? "Please enter an explanation" : null,
+  };
 
-  const handleSubmit = (formValues) => {
-    const updatedAnnotation = {
-      ...context.currentNotes,
-      ...formValues,
-      annotationHexes: context.currentHexes,
-    };
+  const handleSubmit = () => {
+    // Validate
+    const errors = {};
+    if (!context.currentNotes.dataTitle) {
+      errors.dataTitle = "Please enter a data title";
+    }
+    if (!context.currentNotes.explanation) {
+      errors.explanation = "Please enter an explanation";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      // Show validation errors
+      Object.values(errors).forEach((error) => alert(error));
+      return;
+    }
 
     if (context.currentHexes.length === 0) {
       alert("Please select a region first, at least one hex is required.");
       return;
     }
 
-    context.updatePriorAnnotations(updatedAnnotation);
-    context.resetCurrentAnnotation();
-    context.setUpdatingAnnotation(false);
-  };
-
-  const handleReset = (formValues) => {
     const updatedAnnotation = {
       ...context.currentNotes,
       annotationHexes: context.currentHexes,
     };
 
-    if (context.updatingAnnotation) {
-      context.updatePriorAnnotations(updatedAnnotation);
-    }
-
+    context.updatePriorAnnotations(updatedAnnotation);
     context.resetCurrentAnnotation();
-    form.reset();
+    context.setUpdatingAnnotation(false);
+  };
+
+  const handleReset = () => {
+    context.resetCurrentAnnotation();
+  };
+
+  const handleFieldChange = (field, value) => {
+    const updatedNotes = {
+      ...context.currentNotes,
+      [field]: value,
+    };
+    context.setCurrentNotes(updatedNotes);
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+    >
       <Fieldset
         legend={
           context.updatingAnnotation
@@ -79,24 +79,15 @@ function AnnotationInput() {
       >
         <Stack gap="sm">
           <NativeSelect
-            {...form.getInputProps("type")}
+            value={context.currentNotes.type}
             withAsterisk
             label="Select Type of Information"
             data={Object.keys(context.annotationTypes)}
             onChange={(event) => {
-              form.setFieldValue("type", event.currentTarget.value);
-              // context.updateCurrentAnnotationType(event.currentTarget.value);
-              const updatedNotes = {
-                ...context.currentNotes,
-                ...form.values,
-                type: event.currentTarget.value,
-              };
-
-              console.log(updatedNotes);
-              context.setCurrentNotes(updatedNotes);
+              handleFieldChange("type", event.currentTarget.value);
             }}
           />
-          {form.values.type === "Custom" && (
+          {context.currentNotes.type === "Custom" && (
             <ColorInput
               label="Custom Color"
               placeholder="Enter hex color"
@@ -108,12 +99,16 @@ function AnnotationInput() {
             />
           )}
           <TextInput
-            {...form.getInputProps("dataTitle")}
+            value={context.currentNotes.dataTitle}
             label="Data Title"
             placeholder="Enter the data title"
+            onChange={(event) =>
+              handleFieldChange("dataTitle", event.currentTarget.value)
+            }
+            error={!context.currentNotes.dataTitle && validate.dataTitle("")}
           />
           <NativeSelect
-            {...form.getInputProps("locationRating")}
+            value={context.currentNotes.locationRating}
             label="Location Rating (input only when directed)"
             data={[
               "Not applicable",
@@ -121,13 +116,22 @@ function AnnotationInput() {
               "Highly",
               "Moderately",
               "Slightly",
-              "Minimally"
+              "Minimally",
             ]}
+            onChange={(event) =>
+              handleFieldChange("locationRating", event.currentTarget.value)
+            }
           />
           <Textarea
-            {...form.getInputProps("explanation")}
+            value={context.currentNotes.explanation}
             label="Explanation"
             placeholder="Enter your explanation"
+            onChange={(event) =>
+              handleFieldChange("explanation", event.currentTarget.value)
+            }
+            error={
+              !context.currentNotes.explanation && validate.explanation("")
+            }
           />
           <Group mt="md">
             <Button type="submit" variant="outline" color="green">
