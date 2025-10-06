@@ -1,9 +1,9 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
 import TYPES from "./AnnotationTypes";
 
 const AnnotationsContext = createContext();
 
-// eslint-disable-next-line react/prop-types
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState(TYPES);
   const [priorAnnotations, setPriorAnnotations] = useState([]);
@@ -140,7 +140,7 @@ const AnnotationsContextProvider = ({ children }) => {
     }
   };
 
-  const saveStateToStorage = () => {
+  const saveStateToStorage = useCallback(() => {
     const state = {
       priorAnnotations,
       currentIndex,
@@ -149,7 +149,7 @@ const AnnotationsContextProvider = ({ children }) => {
       // currentHexes,
     };
     localStorage.setItem("annotationsState", JSON.stringify(state));
-  };
+  }, [priorAnnotations, currentIndex, intervieweeId]);
 
   const clearStateFromStorage = () => {
     localStorage.removeItem("annotationsState");
@@ -202,6 +202,8 @@ const AnnotationsContextProvider = ({ children }) => {
     currentIndex,
     intervieweeId,
     currentHexes,
+    isInitialized,
+    saveStateToStorage,
   ]);
 
   const resetInterview = () => {
@@ -251,6 +253,9 @@ const AnnotationsContextProvider = ({ children }) => {
       {children}
     </AnnotationsContext.Provider>
   );
+};
+AnnotationsContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export { AnnotationsContextProvider, AnnotationsContext };

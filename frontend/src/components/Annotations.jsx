@@ -42,7 +42,8 @@ function Annotations() {
     },
     validate: {
       dataTitle: (value) => (value === "" ? "Please enter a data title" : null),
-      explanation: (value) => (value === "" ? "Please enter an explanation" : null),
+      explanation: (value) =>
+        value === "" ? "Please enter an explanation" : null,
     },
   });
 
@@ -98,7 +99,10 @@ function Annotations() {
     context.deleteFromPriorAnnotations(item);
 
     // If we're currently viewing the deleted annotation, reset to new annotation mode
-    if (context.viewingPriorAnnotation && context.currentNotes.index === item.index) {
+    if (
+      context.viewingPriorAnnotation &&
+      context.currentNotes.index === item.index
+    ) {
       context.setViewingPriorAnnotation(false);
       context.setEditingAnnotation(false);
       context.resetCurrentAnnotation();
@@ -127,7 +131,13 @@ function Annotations() {
       locationRating: context.currentNotes.locationRating,
       explanation: context.currentNotes.explanation,
     });
-  }, [context.currentNotes]);
+  }, [
+    context.currentNotes.type,
+    context.currentNotes.dataTitle,
+    context.currentNotes.locationRating,
+    context.currentNotes.explanation,
+    form,
+  ]);
 
   return (
     <>
@@ -196,7 +206,7 @@ function Annotations() {
                 "Highly",
                 "Moderately",
                 "Slightly",
-                "Minimally"
+                "Minimally",
               ]}
               disabled={
                 context.viewingPriorAnnotation && !context.editingAnnotation

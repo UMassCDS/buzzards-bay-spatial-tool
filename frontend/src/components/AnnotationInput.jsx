@@ -24,7 +24,8 @@ function AnnotationInput() {
     },
     validate: {
       dataTitle: (value) => (value === "" ? "Please enter a data title" : null),
-      explanation: (value) => (value === "" ? "Please enter an explanation" : null),
+      explanation: (value) =>
+        value === "" ? "Please enter an explanation" : null,
     },
   });
 
@@ -35,7 +36,13 @@ function AnnotationInput() {
       locationRating: context.currentNotes.locationRating,
       explanation: context.currentNotes.explanation,
     });
-  }, [context.currentNotes]);
+  }, [
+    context.currentNotes.type,
+    context.currentNotes.dataTitle,
+    context.currentNotes.locationRating,
+    context.currentNotes.explanation,
+    form,
+  ]);
 
   const handleSubmit = (formValues) => {
     const updatedAnnotation = {
@@ -54,7 +61,7 @@ function AnnotationInput() {
     context.setUpdatingAnnotation(false);
   };
 
-  const handleReset = (formValues) => {
+  const handleReset = () => {
     const updatedAnnotation = {
       ...context.currentNotes,
       annotationHexes: context.currentHexes,
@@ -121,7 +128,7 @@ function AnnotationInput() {
               "Highly",
               "Moderately",
               "Slightly",
-              "Minimally"
+              "Minimally",
             ]}
           />
           <Textarea

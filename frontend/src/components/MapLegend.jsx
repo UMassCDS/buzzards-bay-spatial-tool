@@ -1,6 +1,5 @@
 import {
   Collapse,
-  Text,
   Divider,
   Button,
   Tooltip,

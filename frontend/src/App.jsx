@@ -18,7 +18,7 @@ import "./App.css";
 
 import NavBar from "./components/NavBar";
 import MainContent from "./components/MainContent";
-import {useContext, useRef } from "react";
+import { useContext, useRef } from "react";
 import { useField } from "@mantine/form";
 import { AnnotationsContext } from "./context/AnnotationsContext";
 import Legend from "./components/Legend";
@@ -28,7 +28,7 @@ import { IconQuestionMark } from "@tabler/icons-react";
 function App() {
   const context = useContext(AnnotationsContext);
   const [navBarOpened, { toggle }] = useDisclosure();
-  const [modalOpened, { open, close }] = useDisclosure(true);
+  const [modalOpened, { _open, close }] = useDisclosure(true);
   const helpTriggerRef = useRef();
 
   const validationFunction = (value) => {
@@ -59,7 +59,7 @@ function App() {
           opened={modalOpened && context.intervieweeId === ""}
           onClose={close}
           title={
-            <Group justify="space-between" style={{ width: '100%' }}>
+            <Group justify="space-between" style={{ width: "100%" }}>
               <Text>Login</Text>
               <ActionIcon
                 onClick={() => helpTriggerRef.current?.()}
@@ -105,7 +105,9 @@ function App() {
                 size="sm"
               />
               <GiHarborDock size={30} />
-              <Title order={2}>COMBB Water Quality Monitoring Locations Interview Tool</Title>
+              <Title order={2}>
+                COMBB Water Quality Monitoring Locations Interview Tool
+              </Title>
             </Group>
             <Legend externalTrigger={helpTriggerRef} />
           </Group>
