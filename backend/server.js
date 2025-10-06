@@ -41,6 +41,7 @@ app.post("/api/save", async (req, res) => {
       interviewInsertResult.recordset[0].InterviewID
     );
     const interviewId = interviewInsertResult.recordset[0].InterviewID;
+    // console.log(interview.annotations);
 
     // Gotta do unique names for the parameters for EACH entry
     for (const [
@@ -91,6 +92,34 @@ app.post("/api/save", async (req, res) => {
           console.log("Hexagons batch inserted");
         }
       }
+
+      // if (annotation.annotationHexes?.length > 0) {
+      //   const hexValues = annotation.annotationHexes
+      //     .map((hex) => `(${annotationId}, '${hex}')`)
+      //     .join(",");
+
+      //   await request.query(
+      //     `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES ${hexValues}`
+      //   );
+
+      //   console.log("Hexagons inserted");
+      // }
+
+      // for (const [index, h3Id] of (
+      //   annotation.annotationHexes || []
+      // ).entries()) {
+      //   await request
+      //     .input(
+      //       `AnnotationID_${annotationIndex}_${index}`,
+      //       sql.Int,
+      //       annotationId
+      //     )
+      //     .input(`H3ID_${annotationIndex}_${index}`, sql.NVarChar(255), h3Id)
+      //     .query(
+      //       `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES (@AnnotationID_${annotationIndex}_${index}, @H3ID_${annotationIndex}_${index})`
+      //     );
+      // }
+      // console.log("Hexagons inserted");
     }
 
     await transaction.commit();
@@ -126,31 +155,48 @@ app.get("/data/annotation_types", async (req, res) => {
 
 app.get("/data/sensor_sites", async (req, res) => {
   try {
-
-    // const filePath = "./data/sites/EastCoastPoint_2km.csv";
-    const filePath = "./data/example_sites/sites.csv"
+    const filePath = "./data/example_sites/sites.json";
     const data = await promises.readFile(filePath, "utf-8");
-
-    // Parse CSV data
-    const lines = data.trim().split('\n');
-    const headers = lines[0].split(',');
-
-    // Convert CSV to JSON array
-    const jsonData = lines.slice(1).map((line, index) => {
-      const values = line.split(',');
-      return {
-        site: `Site ${index + 1}`,
-        latitude: parseFloat(values[2]), // POINT_Y
-        longitude: parseFloat(values[1]), // POINT_X
-        description: `Evenly spaced node ${index + 1}`,
-        tide_station: "N/A"
-      };
-    });
-
+    const jsonData = JSON.parse(data);
     res.json(jsonData);
   } catch (error) {
     console.log("Error reading sensor sites: ", error);
-    res.status(500).json({ error: "Failed fetching sensor sites" });
+    res.status(500).json({ error: "Failed fetching types" });
+  }
+});
+
+// Temporary endpoint to check if interviews are being saved with new fields
+app.get("/api/interviews/test", async (req, res) => {
+  try {
+    const pool = await connectToDatabase();
+    const request = pool.request();
+
+    const result = await request.query(`
+      SELECT TOP 5
+        i.InterviewID,
+        i.IntervieweeCode,
+        i.Timestamp,
+        a.AnnotationID,
+        a.StartedAt,
+        a.ModifiedAt,
+        a.AnnotationType,
+        a.Title,
+        a.Note,
+        a.DataTitle,
+        a.LocationRating,
+        a.Explanation
+      FROM [dbo].[Interview] i
+      LEFT JOIN [dbo].[Annotation] a ON i.InterviewID = a.InterviewID
+      ORDER BY i.InterviewID DESC, a.AnnotationID
+    `);
+
+    res.json({
+      message: "Recent interview data with all fields",
+      data: result.recordset
+    });
+  } catch (error) {
+    console.error("Error fetching test interviews:", error);
+    res.status(500).json({ error: "Failed to fetch test interviews" });
   }
 });
 
