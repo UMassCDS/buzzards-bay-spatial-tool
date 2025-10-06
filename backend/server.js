@@ -5,7 +5,7 @@ import sql from "mssql";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import { promises } from "fs";
-import path from "path";
+
 dotenv.config();
 
 const app = express();
@@ -92,34 +92,6 @@ app.post("/api/save", async (req, res) => {
           console.log("Hexagons batch inserted");
         }
       }
-
-      // if (annotation.annotationHexes?.length > 0) {
-      //   const hexValues = annotation.annotationHexes
-      //     .map((hex) => `(${annotationId}, '${hex}')`)
-      //     .join(",");
-
-      //   await request.query(
-      //     `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES ${hexValues}`
-      //   );
-
-      //   console.log("Hexagons inserted");
-      // }
-
-      // for (const [index, h3Id] of (
-      //   annotation.annotationHexes || []
-      // ).entries()) {
-      //   await request
-      //     .input(
-      //       `AnnotationID_${annotationIndex}_${index}`,
-      //       sql.Int,
-      //       annotationId
-      //     )
-      //     .input(`H3ID_${annotationIndex}_${index}`, sql.NVarChar(255), h3Id)
-      //     .query(
-      //       `INSERT INTO [dbo].[Hexagon] (AnnotationID, H3ID) VALUES (@AnnotationID_${annotationIndex}_${index}, @H3ID_${annotationIndex}_${index})`
-      //     );
-      // }
-      // console.log("Hexagons inserted");
     }
 
     await transaction.commit();
