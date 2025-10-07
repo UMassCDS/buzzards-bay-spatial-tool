@@ -106,12 +106,39 @@ function BuildLegend() {
 }
 
 function EvenlySpacedNodesLayer() {
-  const [layerGroup, setLayerGroup] = useState(null);
+  const MIN_ZOOM_NODES = 11; // Adjust this to control when nodes appear
 
+  const [allSites, setAllSites] = useState([]);
+  const [visibleMarkers, setVisibleMarkers] = useState(null);
+  const [zoom, setZoom] = useState(11);
+  const [bounds, setBounds] = useState(null);
+  const [layerEnabled, setLayerEnabled] = useState(false);
+  const map = useMap();
+
+  useMapEvents({
+    zoomend: () => {
+      setZoom(map.getZoom());
+      setBounds(map.getBounds());
+    },
+    moveend: () => {
+      setBounds(map.getBounds());
+    },
+    overlayadd: (e) => {
+      if (e.name === "Evenly Spaced Nodes") {
+        setLayerEnabled(true);
+      }
+    },
+    overlayremove: (e) => {
+      if (e.name === "Evenly Spaced Nodes") {
+        setLayerEnabled(false);
+      }
+    },
+  });
+
+  // Fetch sensor sites once
   useEffect(() => {
     async function fetchSensorSites() {
       try {
-        // console.log("Fetching sensor data.");
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
           {
@@ -123,56 +150,70 @@ function EvenlySpacedNodesLayer() {
         );
 
         const fetchedSites = await response.json();
-        // console.log("Fetched evenly spaced nodes", fetchedSites);
-
-        const canvasRenderer = L.canvas({ padding: 0.5 });
-        const layer = L.layerGroup();
-
-        fetchedSites.forEach((site) => {
-          const marker = L.circleMarker([site.latitude, site.longitude], {
-            renderer: canvasRenderer,
-            radius: 7,
-            fillColor: "purple",
-            color: "purple",
-            weight: 1,
-            fillOpacity: 1,
-          });
-          marker.addTo(layer);
-        });
-
-        setLayerGroup(layer);
+        setAllSites(fetchedSites);
+        setBounds(map.getBounds());
       } catch (error) {
         console.error("Error fetching sensor markers:", error);
       }
     }
 
     fetchSensorSites();
-  }, []);
+  }, [map]);
+
+  // Filter and render only visible markers
+  useEffect(() => {
+    if (!allSites.length || !bounds || zoom < MIN_ZOOM_NODES || !layerEnabled) {
+      if (visibleMarkers) {
+        visibleMarkers.clearLayers();
+        setVisibleMarkers(null);
+      }
+      return;
+    }
+
+    const canvasRenderer = L.canvas({ padding: 0.5 });
+    const layer = L.layerGroup();
+
+    // Filter to only visible sites
+    const visibleSites = allSites.filter((site) =>
+      bounds.contains([site.latitude, site.longitude])
+    );
+
+    visibleSites.forEach((site) => {
+      const marker = L.circleMarker([site.latitude, site.longitude], {
+        renderer: canvasRenderer,
+        radius: 7,
+        fillColor: "purple",
+        color: "purple",
+        weight: 1,
+        fillOpacity: 1,
+      });
+      marker.addTo(layer);
+    });
+
+    setVisibleMarkers(layer);
+
+    return () => {
+      layer.clearLayers();
+    };
+  }, [allSites, bounds, zoom, layerEnabled]);
 
   useEffect(() => {
-    if (layerGroup) {
-      // react-leaflet LayersControl will handle add/remove
-      return () => {
-        layerGroup.clearLayers();
-      };
+    if (visibleMarkers && zoom >= MIN_ZOOM_NODES && layerEnabled) {
+      visibleMarkers.addTo(map);
     }
-  }, [layerGroup]);
 
-  return layerGroup ? (
+    return () => {
+      if (visibleMarkers && map.hasLayer(visibleMarkers)) {
+        map.removeLayer(visibleMarkers);
+      }
+    };
+  }, [visibleMarkers, zoom, layerEnabled, map]);
+
+  return (
     <LayersControl.Overlay name="Evenly Spaced Nodes">
-      <FeatureGroup
-        ref={(ref) => {
-          if (ref && layerGroup) {
-            layerGroup.eachLayer((layer) => {
-              if (!ref.hasLayer(layer)) {
-                ref.addLayer(layer);
-              }
-            });
-          }
-        }}
-      />
+      <FeatureGroup />
     </LayersControl.Overlay>
-  ) : null;
+  );
 }
 
 function PriorAnnotationsLayerByType({ hexagons }) {
