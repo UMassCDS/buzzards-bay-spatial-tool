@@ -27,7 +27,7 @@ import { IconInfoCircle } from "@tabler/icons-react";
 import "../styles/Annotations.css";
 
 function Annotations() {
-  const [opened, { toggle }] = useDisclosure(true);
+  const [opened, { toggle }] = useDisclosure(false);
   const context = useContext(AnnotationsContext);
   const [oldAnnotation, setOldAnnotation] = useState(null);
 
