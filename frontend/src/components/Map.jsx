@@ -5,9 +5,7 @@ import {
   LayersControl,
   Polygon,
   FeatureGroup,
-  Popup,
   useMapEvents,
-  Marker,
   useMap,
 } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
@@ -107,13 +105,40 @@ function BuildLegend() {
   return null;
 }
 
-function EvenlySpacedNodes() {
-  const [markers, setMarkers] = useState([]);
+function EvenlySpacedNodesLayer() {
+  const MIN_ZOOM_NODES = 11; // Adjust this to control when nodes appear
 
+  const [allSites, setAllSites] = useState([]);
+  const [visibleMarkers, setVisibleMarkers] = useState(null);
+  const [zoom, setZoom] = useState(11);
+  const [bounds, setBounds] = useState(null);
+  const [layerEnabled, setLayerEnabled] = useState(false);
+  const map = useMap();
+
+  useMapEvents({
+    zoomend: () => {
+      setZoom(map.getZoom());
+      setBounds(map.getBounds());
+    },
+    moveend: () => {
+      setBounds(map.getBounds());
+    },
+    overlayadd: (e) => {
+      if (e.name === "Evenly Spaced Nodes") {
+        setLayerEnabled(true);
+      }
+    },
+    overlayremove: (e) => {
+      if (e.name === "Evenly Spaced Nodes") {
+        setLayerEnabled(false);
+      }
+    },
+  });
+
+  // Fetch sensor sites once
   useEffect(() => {
-    async function fetchSensorMarkers() {
+    async function fetchSensorSites() {
       try {
-        console.log("Fetching sensor data.");
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
           {
@@ -124,56 +149,185 @@ function EvenlySpacedNodes() {
           }
         );
 
-        const sites = await response.json();
-        console.log("Fetched sensors", sites);
-        const siteMarkers = sites.map((site) => {
-          const color = "purple";
-          const customIcon = L.divIcon({
-            className: "custom-div-icon",
-            html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%;"></div>`,
-            iconSize: [15, 15],
-            iconAnchor: [7.5, 7.5],
-            popupAnchor: [0, -10],
-          });
-
-          return L.marker([site["latitude"], site["longitude"]], {
-            icon: customIcon,
-          });
-        });
-        setMarkers(siteMarkers);
+        const fetchedSites = await response.json();
+        setAllSites(fetchedSites);
+        setBounds(map.getBounds());
       } catch (error) {
         console.error("Error fetching sensor markers:", error);
       }
     }
 
-    fetchSensorMarkers();
-  }, []);
+    fetchSensorSites();
+  }, [map]);
+
+  // Filter and render only visible markers
+  useEffect(() => {
+    if (!allSites.length || !bounds || zoom < MIN_ZOOM_NODES || !layerEnabled) {
+      if (visibleMarkers) {
+        visibleMarkers.clearLayers();
+        setVisibleMarkers(null);
+      }
+      return;
+    }
+
+    const canvasRenderer = L.canvas({ padding: 0.5 });
+    const layer = L.layerGroup();
+
+    // Filter to only visible sites
+    const visibleSites = allSites.filter((site) =>
+      bounds.contains([site.latitude, site.longitude])
+    );
+
+    visibleSites.forEach((site) => {
+      const marker = L.circleMarker([site.latitude, site.longitude], {
+        renderer: canvasRenderer,
+        radius: 7,
+        fillColor: "purple",
+        color: "purple",
+        weight: 1,
+        fillOpacity: 1,
+      });
+      marker.addTo(layer);
+    });
+
+    setVisibleMarkers(layer);
+
+    return () => {
+      layer.clearLayers();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allSites, bounds, zoom, layerEnabled]);
+
+  useEffect(() => {
+    if (visibleMarkers && zoom >= MIN_ZOOM_NODES && layerEnabled) {
+      visibleMarkers.addTo(map);
+    }
+
+    return () => {
+      if (visibleMarkers && map.hasLayer(visibleMarkers)) {
+        map.removeLayer(visibleMarkers);
+      }
+    };
+  }, [visibleMarkers, zoom, layerEnabled, map]);
 
   return (
-    <FeatureGroup>
-      {markers.map((marker, index) => (
-        <Marker
-          key={index}
-          position={marker.getLatLng()}
-          icon={marker.options.icon}
-        >
-          {marker.popupContent && <Popup>{marker.popupContent}</Popup>}
-        </Marker>
-      ))}
-    </FeatureGroup>
+    <LayersControl.Overlay name="Evenly Spaced Nodes">
+      <FeatureGroup />
+    </LayersControl.Overlay>
   );
 }
 
 function PriorAnnotationsLayerByType({ hexagons }) {
+  const [zoom, setZoom] = useState(11);
+  const [canvasLayer, setCanvasLayer] = useState(null);
+  const map = useMap();
+
+  useMapEvents({
+    zoomend: () => {
+      setZoom(map.getZoom());
+    },
+  });
+
+  // Use custom canvas layer for low zoom levels
+  useEffect(() => {
+    if (!map || zoom >= 10) {
+      if (canvasLayer) {
+        map.removeLayer(canvasLayer);
+        setCanvasLayer(null);
+      }
+      return;
+    }
+
+    // Create custom canvas layer for better performance
+    const CanvasLayer = L.Layer.extend({
+      onAdd: function (map) {
+        const canvas = L.DomUtil.create("canvas");
+        const size = map.getSize();
+        canvas.width = size.x;
+        canvas.height = size.y;
+        canvas.style.position = "absolute";
+
+        this._canvas = canvas;
+        this._ctx = canvas.getContext("2d");
+
+        map.getPanes().overlayPane.appendChild(canvas);
+        map.on("moveend", this._reset, this);
+        this._reset();
+      },
+
+      onRemove: function (map) {
+        map.getPanes().overlayPane.removeChild(this._canvas);
+        map.off("moveend", this._reset, this);
+      },
+
+      _reset: function () {
+        const topLeft = this._map.containerPointToLayerPoint([0, 0]);
+        L.DomUtil.setPosition(this._canvas, topLeft);
+        this._draw();
+      },
+
+      _draw: function () {
+        const ctx = this._ctx;
+        const size = this._map.getSize();
+        ctx.clearRect(0, 0, size.x, size.y);
+
+        // Aggressive sampling based on zoom
+        const sampleRate = zoom < 8 ? 10 : zoom < 9 ? 5 : 3;
+
+        for (let i = 0; i < hexagons.length; i += sampleRate) {
+          const hex = hexagons[i];
+          const center = hex.boundary
+            .reduce(
+              (acc, coord) => [acc[0] + coord[0], acc[1] + coord[1]],
+              [0, 0]
+            )
+            .map((v) => v / hex.boundary.length);
+
+          const point = this._map.latLngToContainerPoint(center);
+
+          // Draw small circles
+          ctx.fillStyle = hex.color;
+          ctx.globalAlpha = 0.5;
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, zoom < 8 ? 2 : 3, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      },
+    });
+
+    const layer = new CanvasLayer();
+    map.addLayer(layer);
+    setCanvasLayer(layer);
+
+    return () => {
+      if (layer && map.hasLayer(layer)) {
+        map.removeLayer(layer);
+      }
+    };
+  }, [zoom, hexagons, map, canvasLayer]);
+
+  // Only render actual polygons at high zoom
+  if (zoom < 10) {
+    return null;
+  }
+
+  // At medium zoom, reduce detail
+  const simplifiedHexagons =
+    zoom < 12 ? hexagons.filter((_, index) => index % 2 === 0) : hexagons;
+
   return (
     <>
-      {hexagons.map((hex) => (
+      {simplifiedHexagons.map((hex) => (
         <Polygon
           key={hex.id}
           weight={2.5}
           fillOpacity={0.2}
           positions={hex.boundary}
-          pathOptions={{ color: hex.color, fillColor: hex.color, opacity: 0.6 }}
+          pathOptions={{
+            color: hex.color,
+            fillColor: hex.color,
+            opacity: 0.6,
+          }}
         />
       ))}
     </>
@@ -438,9 +592,7 @@ function Map() {
               </LayersControl.Overlay>
             );
           })}
-          <LayersControl.Overlay name="Evenly Spaced Nodes">
-            <EvenlySpacedNodes />
-          </LayersControl.Overlay>
+          <EvenlySpacedNodesLayer />
         </LayersControl>
         <FeatureGroup>
           {(!context.viewingPriorAnnotation || context.editingAnnotation) && (
