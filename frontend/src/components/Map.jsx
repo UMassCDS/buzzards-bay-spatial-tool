@@ -195,6 +195,7 @@ function EvenlySpacedNodesLayer() {
     return () => {
       layer.clearLayers();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSites, bounds, zoom, layerEnabled]);
 
   useEffect(() => {
