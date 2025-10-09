@@ -99,8 +99,7 @@ function BuildLegend() {
       legend.remove();
       style.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [map, hexTypeSymbols, sensorSymbols]);
 
   return null;
 }
@@ -135,7 +134,7 @@ function EvenlySpacedNodesLayer() {
     },
   });
 
-  // Fetch sensor sites once
+  // Fetch sensor sites only when needed
   useEffect(() => {
     async function fetchSensorSites() {
       try {
@@ -157,8 +156,16 @@ function EvenlySpacedNodesLayer() {
       }
     }
 
-    fetchSensorSites();
-  }, [map]);
+    // Only fetch if layer is enabled and zoom is high enough
+    if (layerEnabled && zoom >= MIN_ZOOM_NODES && allSites.length === 0) {
+      fetchSensorSites();
+    }
+
+    // Clear from memory when not needed
+    if ((!layerEnabled || zoom < MIN_ZOOM_NODES) && allSites.length > 0) {
+      setAllSites([]);
+    }
+  }, [map, layerEnabled, zoom, allSites.length]);
 
   // Filter and render only visible markers
   useEffect(() => {
@@ -171,17 +178,25 @@ function EvenlySpacedNodesLayer() {
     }
 
     const canvasRenderer = L.canvas({ padding: 0.5 });
-    const layer = L.layerGroup();
+
+    // Reuse existing layer if available, otherwise create new one
+    const layer = visibleMarkers || L.layerGroup();
+
+    // Clear existing markers before adding new ones
+    layer.clearLayers();
 
     // Filter to only visible sites
     const visibleSites = allSites.filter((site) =>
       bounds.contains([site.latitude, site.longitude])
     );
 
+    // Calculate radius based on zoom - smaller when zoomed out
+    const radius = Math.max(2, Math.min(10, (zoom - MIN_ZOOM_NODES) * 1.8 + 2));
+
     visibleSites.forEach((site) => {
       const marker = L.circleMarker([site.latitude, site.longitude], {
         renderer: canvasRenderer,
-        radius: 7,
+        radius: radius,
         fillColor: "purple",
         color: "purple",
         weight: 1,
@@ -190,11 +205,9 @@ function EvenlySpacedNodesLayer() {
       marker.addTo(layer);
     });
 
-    setVisibleMarkers(layer);
-
-    return () => {
-      layer.clearLayers();
-    };
+    if (!visibleMarkers) {
+      setVisibleMarkers(layer);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSites, bounds, zoom, layerEnabled]);
 
