@@ -15,7 +15,7 @@ import "../styles/Map.css";
 import L from "leaflet";
 import "@gnatih/leaflet.legend";
 import * as h3 from "h3-js";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useMemo } from "react";
 import { ActionIcon } from "@mantine/core";
 import { IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
 
@@ -49,18 +49,21 @@ function BuildLegend() {
     weight: 2,
   }));
 
-  const sensorSymbols = [];
-
-  if (context.sensorDataVisible) {
-    sensorSymbols.push({
-      label: "Evenly Spaced Nodes",
-      type: "circle",
-      radius: 6,
-      color: "purple",
-      fillColor: "purple",
-      weight: 1,
-    });
-  }
+  const sensorSymbols = useMemo(() => {
+    if (context.sensorDataVisible) {
+      return [
+        {
+          label: "Evenly Spaced Nodes",
+          type: "circle",
+          radius: 6,
+          color: "purple",
+          fillColor: "purple",
+          weight: 1,
+        },
+      ];
+    }
+    return [];
+  }, [context.sensorDataVisible]);
 
   const map = useMap();
   useEffect(() => {
