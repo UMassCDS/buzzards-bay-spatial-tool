@@ -1,11 +1,10 @@
 const TYPES = {
-  "Area of Importance": "#137ac2",
+  "Area of Importance": "#006fff",
   "Comparable Areas": "#c23b8a",
-  "Appropriate for Monitoring Area of Importance": "#84aa10",
-  "Inappropriate for Monitoring Area of Interest": "#e67300",
-  "Hypothetical Sensor Network Locations": "#ffcc00",
+  "Appropriate for Monitoring Area of Importance": "#0b7a14",
+  "Inappropriate for Monitoring Area of Interest": "#f50000",
+  "Hypothetical Sensor Network Locations": "#5b00d1",
   "Poor Sensor Network Locations": "#666666",
-  Custom: "#ff0000",
 };
 
 export default TYPES;

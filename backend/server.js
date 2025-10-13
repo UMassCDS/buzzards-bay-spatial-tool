@@ -113,18 +113,6 @@ app.post("/api/save", async (req, res) => {
   }
 });
 
-app.get("/data/annotation_types", async (req, res) => {
-  try {
-    const filePath = "./data/annotationtypes.json";
-    const data = await promises.readFile(filePath, "utf-8");
-    const jsonData = JSON.parse(data);
-    res.json(jsonData);
-  } catch (error) {
-    console.log("Error reading types: ", error);
-    res.status(500).json({ error: "Failed fetching types" });
-  }
-});
-
 app.get("/data/sensor_sites", async (req, res) => {
   try {
 
@@ -133,7 +121,6 @@ app.get("/data/sensor_sites", async (req, res) => {
 
     // Parse CSV data
     const lines = data.trim().split('\n');
-    const headers = lines[0].split(',');
 
     // Convert CSV to JSON array
     const jsonData = lines.slice(1).map((line, index) => {
