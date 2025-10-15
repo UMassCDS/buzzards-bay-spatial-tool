@@ -109,7 +109,7 @@ function BuildLegend() {
 }
 
 function EvenlySpacedNodesLayer() {
-  const MIN_ZOOM_NODES = 11;
+  const MIN_ZOOM_NODES = 10;
   const context = useContext(AnnotationsContext);
 
   const [canvasLayer, setCanvasLayer] = useState(null);
