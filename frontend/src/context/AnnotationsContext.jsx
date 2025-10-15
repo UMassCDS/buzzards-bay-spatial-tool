@@ -15,6 +15,7 @@ const AnnotationsContextProvider = ({ children }) => {
 
   const [sensorDataVisible, setSensorDataVisible] = useState(true);
   const [sensorLocationsVisible, setSensorLocationsVisible] = useState(true);
+  const [selectedRegion, setSelectedRegion] = useState("newengland");
 
   const [currentNotes, setCurrentNotes] = useState({
     type: "Area of Importance",
@@ -140,9 +141,10 @@ const AnnotationsContextProvider = ({ children }) => {
       priorAnnotations,
       currentIndex,
       intervieweeId,
+      selectedRegion,
     };
     localStorage.setItem("annotationsState", JSON.stringify(state));
-  }, [priorAnnotations, currentIndex, intervieweeId]);
+  }, [priorAnnotations, currentIndex, intervieweeId, selectedRegion]);
 
   const clearStateFromStorage = () => {
     localStorage.removeItem("annotationsState");
@@ -152,12 +154,17 @@ const AnnotationsContextProvider = ({ children }) => {
     const loadStateFromStorage = async () => {
       const savedState = localStorage.getItem("annotationsState");
       if (savedState) {
-        const { priorAnnotations, currentIndex, intervieweeId } =
-          JSON.parse(savedState);
+        const {
+          priorAnnotations,
+          currentIndex,
+          intervieweeId,
+          selectedRegion,
+        } = JSON.parse(savedState);
 
         setPriorAnnotations(priorAnnotations || []);
         setCurrentIndex(currentIndex || 0);
         setIntervieweeId(intervieweeId || "");
+        setSelectedRegion(selectedRegion || "newengland");
       }
       setIsInitialized(true);
     };
@@ -185,6 +192,7 @@ const AnnotationsContextProvider = ({ children }) => {
     resetCurrentAnnotation();
     clearStateFromStorage();
     setIntervieweeId("");
+    setSelectedRegion("newengland");
     window.location.reload();
   };
 
@@ -201,8 +209,10 @@ const AnnotationsContextProvider = ({ children }) => {
         annotationTypes,
         sensorDataVisible,
         sensorLocationsVisible,
+        selectedRegion,
         setSensorDataVisible,
         setSensorLocationsVisible,
+        setSelectedRegion,
         resetInterview,
         setIntervieweeId,
         setEditingAnnotation,
