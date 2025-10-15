@@ -109,7 +109,7 @@ function BuildLegend() {
 }
 
 function EvenlySpacedNodesLayer() {
-  const MIN_ZOOM_NODES = 11;
+  const MIN_ZOOM_NODES = 10;
   const context = useContext(AnnotationsContext);
 
   const [canvasLayer, setCanvasLayer] = useState(null);
@@ -161,6 +161,8 @@ function EvenlySpacedNodesLayer() {
           lng: site.longitude,
         }));
 
+        console.log(`[FRONTEND] Received ${fetchedSites.length} sensor points for region: ${context.selectedRegion}`);
+        console.log(`[FRONTEND] Cached ${optimizedSites.length} optimized points in memory`);
         setSitesCache(optimizedSites);
       } catch (error) {
         console.error("Error fetching sensor markers:", error);

@@ -115,8 +115,20 @@ app.post("/api/save", async (req, res) => {
 
 app.get("/data/sensor_sites", async (req, res) => {
   try {
+    const region = req.query.region || "newengland";
 
-    const filePath = "./data/sites/EastCoastPoint_2km.csv";
+    // Map region names to file paths
+    const regionFiles = {
+      "newengland": "./data/sites/NewEngland_2km_EPSG_4326.csv",
+      "midatlanticnorth": "./data/sites/MidAtlanticNorth_2km_EPSG_4326.csv",
+      "midatlanticsouth": "./data/sites/MidAtlanticSouth_2km_EPSG_4326.csv"
+    };
+
+    const filePath = regionFiles[region.toLowerCase()];
+    if (!filePath) {
+      return res.status(400).json({ error: "Invalid region specified" });
+    }
+
     const data = await promises.readFile(filePath, "utf-8");
 
     // Parse CSV data
