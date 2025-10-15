@@ -9,6 +9,7 @@ import {
   Group,
   MantineProvider,
   Modal,
+  Select,
   Text,
   TextInput,
   Title,
@@ -18,18 +19,20 @@ import "./App.css";
 
 import NavBar from "./components/NavBar";
 import MainContent from "./components/MainContent";
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import { useField } from "@mantine/form";
 import { AnnotationsContext } from "./context/AnnotationsContext";
 import Legend from "./components/Legend";
 import { GiHarborDock } from "react-icons/gi";
 import { IconQuestionMark } from "@tabler/icons-react";
+import REGIONS from "./config/regions";
 
 function App() {
   const context = useContext(AnnotationsContext);
   const [navBarOpened, { toggle }] = useDisclosure();
   const [modalOpened, { _open, close }] = useDisclosure(true);
   const helpTriggerRef = useRef();
+  const [selectedRegion, setSelectedRegion] = useState("newengland");
 
   const validationFunction = (value) => {
     if (value === "") {
@@ -43,6 +46,11 @@ function App() {
     initialValue: "",
     validate: (value) => (validationFunction(value) ? "Code not valid" : null),
   });
+
+  const regionOptions = Object.values(REGIONS).map((region) => ({
+    value: region.id,
+    label: region.name,
+  }));
 
   return (
     <MantineProvider>
@@ -85,10 +93,21 @@ function App() {
             description="A User Code is required to access the tool. Please enter the User Code provided by the Interviewer."
             mb="md"
           />
+          <Select
+            label="Select Region"
+            placeholder="Choose a region"
+            description="Select the region you want to work with. This cannot be changed after login."
+            data={regionOptions}
+            value={selectedRegion}
+            onChange={(value) => setSelectedRegion(value)}
+            required
+            mb="md"
+          />
           <Button
             disabled={!validationFunction(userCodeField.getValue())}
             onClick={() => {
               context.setIntervieweeId(userCodeField.getValue());
+              context.setSelectedRegion(selectedRegion);
               close();
             }}
           >

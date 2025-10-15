@@ -20,6 +20,7 @@ import { ActionIcon } from "@mantine/core";
 import { IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
 
 import { AnnotationsContext } from "../context/AnnotationsContext";
+import REGIONS from "../config/regions";
 
 window.type = true;
 
@@ -108,13 +109,14 @@ function BuildLegend() {
 }
 
 function EvenlySpacedNodesLayer() {
-  const MIN_ZOOM_NODES = 11; // Adjust this to control when nodes appear
+  const MIN_ZOOM_NODES = 11;
+  const context = useContext(AnnotationsContext);
 
-  const [allSites, setAllSites] = useState([]);
-  const [visibleMarkers, setVisibleMarkers] = useState(null);
+  const [canvasLayer, setCanvasLayer] = useState(null);
   const [zoom, setZoom] = useState(11);
   const [bounds, setBounds] = useState(null);
   const [layerEnabled, setLayerEnabled] = useState(false);
+  const [sitesCache, setSitesCache] = useState(null); // Cache full dataset per region
   const map = useMap();
 
   useMapEvents({
@@ -137,12 +139,12 @@ function EvenlySpacedNodesLayer() {
     },
   });
 
-  // Fetch sensor sites only when needed
+  // Fetch and cache sensor sites per region
   useEffect(() => {
     async function fetchSensorSites() {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites`,
+          `${import.meta.env.VITE_BACKEND_IP}/data/sensor_sites?region=${context.selectedRegion}`,
           {
             method: "GET",
             headers: {
@@ -152,79 +154,138 @@ function EvenlySpacedNodesLayer() {
         );
 
         const fetchedSites = await response.json();
-        setAllSites(fetchedSites);
-        setBounds(map.getBounds());
+
+        // Optimize: only store lat/lng, drop unnecessary fields to reduce memory
+        const optimizedSites = fetchedSites.map((site) => ({
+          lat: site.latitude,
+          lng: site.longitude,
+        }));
+
+        setSitesCache(optimizedSites);
       } catch (error) {
         console.error("Error fetching sensor markers:", error);
       }
     }
 
-    // Only fetch if layer is enabled and zoom is high enough
-    if (layerEnabled && zoom >= MIN_ZOOM_NODES && allSites.length === 0) {
+    // Fetch only if we don't have data for this region yet
+    if (layerEnabled && zoom >= MIN_ZOOM_NODES && !sitesCache) {
       fetchSensorSites();
     }
 
-    // Clear from memory when not needed
-    if ((!layerEnabled || zoom < MIN_ZOOM_NODES) && allSites.length > 0) {
-      setAllSites([]);
+    // Clear cache when not needed
+    if ((!layerEnabled || zoom < MIN_ZOOM_NODES) && sitesCache) {
+      setSitesCache(null);
     }
-  }, [map, layerEnabled, zoom, allSites.length]);
+  }, [layerEnabled, zoom, sitesCache, context.selectedRegion]);
 
-  // Filter and render only visible markers
+  // Clear cache when region changes
   useEffect(() => {
-    if (!allSites.length || !bounds || zoom < MIN_ZOOM_NODES || !layerEnabled) {
-      if (visibleMarkers) {
-        visibleMarkers.clearLayers();
-        setVisibleMarkers(null);
+    setSitesCache(null);
+  }, [context.selectedRegion]);
+
+  // Use canvas rendering for performance
+  useEffect(() => {
+    if (!sitesCache || !bounds || zoom < MIN_ZOOM_NODES || !layerEnabled) {
+      // Clean up existing layer
+      if (canvasLayer) {
+        map.removeLayer(canvasLayer);
+        setCanvasLayer(null);
       }
       return;
     }
 
-    const canvasRenderer = L.canvas({ padding: 0.5 });
+    // Remove old layer if exists
+    if (canvasLayer) {
+      map.removeLayer(canvasLayer);
+    }
 
-    // Reuse existing layer if available, otherwise create new one
-    const layer = visibleMarkers || L.layerGroup();
-
-    // Clear existing markers before adding new ones
-    layer.clearLayers();
-
-    // Filter to only visible sites
-    const visibleSites = allSites.filter((site) =>
-      bounds.contains([site.latitude, site.longitude])
+    // Filter to visible sites only
+    const visibleSites = sitesCache.filter((site) =>
+      bounds.contains([site.lat, site.lng])
     );
 
-    // Calculate radius based on zoom - smaller when zoomed out
-    const radius = Math.max(2, Math.min(10, (zoom - MIN_ZOOM_NODES) * 1.8 + 2));
+    // Create custom canvas layer for maximum performance
+    const CanvasLayer = L.Layer.extend({
+      onAdd: function (map) {
+        const canvas = L.DomUtil.create("canvas");
+        const size = map.getSize();
+        canvas.width = size.x;
+        canvas.height = size.y;
+        canvas.style.position = "absolute";
+        canvas.style.pointerEvents = "none";
 
-    visibleSites.forEach((site) => {
-      const marker = L.circleMarker([site.latitude, site.longitude], {
-        renderer: canvasRenderer,
-        radius: radius,
-        fillColor: "purple",
-        color: "purple",
-        weight: 1,
-        fillOpacity: 1,
-      });
-      marker.addTo(layer);
+        this._canvas = canvas;
+        this._ctx = canvas.getContext("2d");
+        this._map = map;
+
+        map.getPanes().overlayPane.appendChild(canvas);
+        map.on("moveend", this._reset, this);
+        map.on("zoomend", this._reset, this);
+        this._reset();
+      },
+
+      onRemove: function (map) {
+        if (this._canvas && this._canvas.parentNode) {
+          map.getPanes().overlayPane.removeChild(this._canvas);
+        }
+        map.off("moveend", this._reset, this);
+        map.off("zoomend", this._reset, this);
+      },
+
+      _reset: function () {
+        const topLeft = this._map.containerPointToLayerPoint([0, 0]);
+        L.DomUtil.setPosition(this._canvas, topLeft);
+
+        const size = this._map.getSize();
+        this._canvas.width = size.x;
+        this._canvas.height = size.y;
+
+        this._draw();
+      },
+
+      _draw: function () {
+        const ctx = this._ctx;
+        const size = this._map.getSize();
+        ctx.clearRect(0, 0, size.x, size.y);
+
+        const currentZoom = this._map.getZoom();
+        const radius = Math.max(
+          2,
+          Math.min(10, (currentZoom - MIN_ZOOM_NODES) * 1.8 + 2)
+        );
+        const currentBounds = this._map.getBounds();
+
+        ctx.fillStyle = "purple";
+        ctx.strokeStyle = "purple";
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 1;
+
+        visibleSites.forEach((site) => {
+          if (currentBounds.contains([site.lat, site.lng])) {
+            const point = this._map.latLngToContainerPoint([
+              site.lat,
+              site.lng,
+            ]);
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+          }
+        });
+      },
     });
 
-    if (!visibleMarkers) {
-      setVisibleMarkers(layer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSites, bounds, zoom, layerEnabled]);
-
-  useEffect(() => {
-    if (visibleMarkers && zoom >= MIN_ZOOM_NODES && layerEnabled) {
-      visibleMarkers.addTo(map);
-    }
+    const layer = new CanvasLayer();
+    map.addLayer(layer);
+    setCanvasLayer(layer);
 
     return () => {
-      if (visibleMarkers && map.hasLayer(visibleMarkers)) {
-        map.removeLayer(visibleMarkers);
+      if (layer && map.hasLayer(layer)) {
+        map.removeLayer(layer);
       }
     };
-  }, [visibleMarkers, zoom, layerEnabled, map]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sitesCache, bounds, zoom, layerEnabled, map]);
 
   return (
     <LayersControl.Overlay name="Evenly Spaced Nodes">
@@ -254,6 +315,11 @@ function PriorAnnotationsLayerByType({ hexagons }) {
       return;
     }
 
+    // Remove old layer if exists
+    if (canvasLayer) {
+      map.removeLayer(canvasLayer);
+    }
+
     // Create custom canvas layer for better performance
     const CanvasLayer = L.Layer.extend({
       onAdd: function (map) {
@@ -272,7 +338,9 @@ function PriorAnnotationsLayerByType({ hexagons }) {
       },
 
       onRemove: function (map) {
-        map.getPanes().overlayPane.removeChild(this._canvas);
+        if (this._canvas && this._canvas.parentNode) {
+          map.getPanes().overlayPane.removeChild(this._canvas);
+        }
         map.off("moveend", this._reset, this);
       },
 
@@ -287,7 +355,6 @@ function PriorAnnotationsLayerByType({ hexagons }) {
         const size = this._map.getSize();
         ctx.clearRect(0, 0, size.x, size.y);
 
-        // Aggressive sampling based on zoom
         const sampleRate = zoom < 8 ? 10 : zoom < 9 ? 5 : 3;
 
         for (let i = 0; i < hexagons.length; i += sampleRate) {
@@ -301,7 +368,6 @@ function PriorAnnotationsLayerByType({ hexagons }) {
 
           const point = this._map.latLngToContainerPoint(center);
 
-          // Draw small circles
           ctx.fillStyle = hex.color;
           ctx.globalAlpha = 0.5;
           ctx.beginPath();
@@ -320,7 +386,8 @@ function PriorAnnotationsLayerByType({ hexagons }) {
         map.removeLayer(layer);
       }
     };
-  }, [zoom, hexagons, map, canvasLayer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom, hexagons, map]);
 
   // Only render actual polygons at high zoom
   if (zoom < 10) {
@@ -398,6 +465,20 @@ const MapController = ({ mapMode }) => {
       map.getContainer().style.cursor = "";
     }
   }, [map, mapMode]);
+
+  return null;
+};
+
+const RegionController = () => {
+  const context = useContext(AnnotationsContext);
+  const map = useMap();
+
+  useEffect(() => {
+    const regionConfig = REGIONS[context.selectedRegion];
+    if (regionConfig) {
+      map.setView(regionConfig.center, regionConfig.zoom);
+    }
+  }, [context.selectedRegion, map]);
 
   return null;
 };
@@ -514,7 +595,7 @@ function Map() {
       <div
         style={{
           position: "absolute",
-          top: "158px",
+          top: "10px",
           left: "10px",
           zIndex: 99,
           backgroundColor: "white",
@@ -566,6 +647,7 @@ function Map() {
         style={{ height: "80vh", width: "100%", zIndex: 0 }}
       >
         <MapController mapMode={mapMode} />
+        <RegionController />
         <BuildLegend />
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="OpenStreetMap">
