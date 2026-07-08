@@ -5,12 +5,19 @@ import sql from "mssql";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import { promises } from "fs";
+import * as h3 from "h3-js";
 
 dotenv.config();
 
+// Resolution used by the frontend to generate annotation hexes. Kept in sync so
+// we can un-compact hexes back to their full-resolution set before storing them.
+const HEX_RESOLUTION = 10;
+
 const app = express();
 app.use(cors());
-app.use(express.json());
+// Selections over large areas produce big hex arrays. The frontend compacts them
+// before sending, but allow a generous body size so we never reject a valid save.
+app.use(express.json({ limit: "50mb" }));
 app.use(morgan("dev"));
 
 app.get("/", async (req, res) => {
@@ -77,10 +84,26 @@ app.post("/api/save", async (req, res) => {
       const annotationId = annotationInsertResult.recordset[0].AnnotationID;
       console.log("Annotation inserted, ID:", annotationId);
 
-      if (annotation.annotationHexes?.length > 0) {
+      // The frontend may send a compacted set of hexes (mixed resolutions) to
+      // keep the payload small. Expand it back to the full HEX_RESOLUTION set so
+      // the Hexagon table always stores uniform-resolution cells. Un-compacting a
+      // set that is already at full resolution is a no-op, so this is safe either way.
+      let hexes = annotation.annotationHexes || [];
+      if (hexes.length > 0) {
+        try {
+          hexes = h3.uncompactCells(hexes, HEX_RESOLUTION);
+        } catch (err) {
+          console.warn(
+            "Failed to un-compact hexes, storing as received:",
+            err.message
+          );
+        }
+      }
+
+      if (hexes.length > 0) {
         const batchSize = 1000; // SQL server limit
-        for (let i = 0; i < annotation.annotationHexes.length; i += batchSize) {
-          const batchHexes = annotation.annotationHexes.slice(i, i + batchSize);
+        for (let i = 0; i < hexes.length; i += batchSize) {
+          const batchHexes = hexes.slice(i, i + batchSize);
           const hexValues = batchHexes
             .map((hex) => `(${annotationId}, '${hex}')`)
             .join(",");
@@ -151,6 +174,20 @@ app.get("/data/sensor_sites", async (req, res) => {
     console.log("Error reading sensor sites: ", error);
     res.status(500).json({ error: "Failed fetching sensor sites" });
   }
+});
+
+// Error-handling middleware. Turns body-parser's "payload too large" (thrown
+// before any route runs) into a clear, actionable JSON message for the client.
+app.use((err, req, res, next) => {
+  if (err && (err.type === "entity.too.large" || err.status === 413)) {
+    console.error("Rejected save: request body too large");
+    return res.status(413).json({
+      message:
+        "The selected area is too large to save. Please select a smaller region, or split it into multiple annotations.",
+    });
+  }
+  console.error("Unhandled request error:", err);
+  return res.status(500).json({ message: "Unexpected server error" });
 });
 
 const checkDatabaseConnection = async () => {

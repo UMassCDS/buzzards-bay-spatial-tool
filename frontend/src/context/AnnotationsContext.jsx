@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
+import * as h3 from "h3-js";
 import TYPES from "./AnnotationTypes";
 
 const AnnotationsContext = createContext();
@@ -110,7 +111,21 @@ const AnnotationsContextProvider = ({ children }) => {
   const saveInterview = async () => {
     const interview = {};
     interview.intervieweeId = intervieweeId;
-    interview.annotations = priorAnnotations;
+    // Compact each annotation's hexes before sending. A filled area of same-resolution
+    // hexes collapses into far fewer mixed-resolution cells, which keeps the request
+    // body small for large selections. The backend un-compacts them before storing.
+    interview.annotations = priorAnnotations.map((annotation) => {
+      const hexes = annotation.annotationHexes;
+      if (!hexes || hexes.length === 0) {
+        return annotation;
+      }
+      try {
+        return { ...annotation, annotationHexes: h3.compactCells(hexes) };
+      } catch (error) {
+        console.warn("Failed to compact hexes, sending uncompacted", error);
+        return annotation;
+      }
+    });
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_IP}/api/save`,
@@ -123,7 +138,12 @@ const AnnotationsContextProvider = ({ children }) => {
         }
       );
       if (!response.ok) {
-        throw new Error(`Error saving interview! status: ${response.status}`);
+        // Surface the backend's descriptive message when available (e.g. a 413 for
+        // an area that is too large even after compaction).
+        const body = await response.json().catch(() => null);
+        const message =
+          body?.message || `Error saving interview! status: ${response.status}`;
+        return { success: false, message, interview };
       }
       return {
         success: true,
