@@ -645,6 +645,9 @@ function Map() {
         center={[41.7454, -70.6181]}
         zoom={11}
         style={{ height: "80vh", width: "100%", zIndex: 0 }}
+        // Render vector layers (hexagons) on a single canvas instead of one SVG
+        // node each, so large selections with thousands of hexes stay responsive.
+        preferCanvas={true}
       >
         <MapController mapMode={mapMode} />
         <RegionController />
