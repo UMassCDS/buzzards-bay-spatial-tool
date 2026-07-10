@@ -18,7 +18,11 @@ import "@gnatih/leaflet.legend";
 import * as h3 from "h3-js";
 import { useEffect, useState, useContext, useMemo, useRef } from "react";
 import { ActionIcon } from "@mantine/core";
-import { IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
+import {
+  IconArrowsMove,
+  IconHandFinger,
+  IconFocusCentered,
+} from "@tabler/icons-react";
 
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import REGIONS from "../config/regions";
@@ -493,6 +497,50 @@ const RegionController = () => {
   return null;
 };
 
+const ResetViewButton = () => {
+  const context = useContext(AnnotationsContext);
+  const map = useMap();
+
+  const resetView = () => {
+    const regionConfig = REGIONS[context.selectedRegion];
+    if (regionConfig) {
+      map.setView(regionConfig.center, regionConfig.zoom);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "90px",
+        left: "10px",
+        zIndex: 99,
+        backgroundColor: "white",
+        borderRadius: "4px",
+        border: "2px solid rgba(128, 128, 128, 0.5)",
+        width: "33px",
+      }}
+    >
+      <ActionIcon
+        variant="light"
+        color="gray"
+        size="lg"
+        onClick={resetView}
+        title="Reset map view"
+        style={{
+          borderRadius: "2px",
+          width: "100%",
+          height: "29px",
+          minWidth: "29px",
+          minHeight: "29px",
+        }}
+      >
+        <IconFocusCentered size={16} />
+      </ActionIcon>
+    </div>
+  );
+};
+
 function Map() {
   const context = useContext(AnnotationsContext);
   const [selectedHexagons, setSelectedHexagons] = useState([]);
@@ -665,6 +713,7 @@ function Map() {
       >
         <MapController mapMode={mapMode} />
         <RegionController />
+        <ResetViewButton />
         <BuildLegend />
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="OpenStreetMap">
