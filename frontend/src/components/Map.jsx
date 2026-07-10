@@ -32,6 +32,8 @@ const HEX_GRID_MIN_ZOOM = 15;
 const HEX_GRID_MAX_CELLS = 2000;
 // Max hexes added since the last full merge before re-merging the selection
 const SELECTION_REMERGE_THRESHOLD = 300;
+// Reject drawn selections above this many hexes (the UI freezes for minutes)
+const MAX_SELECTION_CELLS = 100000;
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -582,6 +584,16 @@ function Map() {
       const polygonCoords = layer
         .getLatLngs()[0]
         .map((latlng) => [latlng.lat, latlng.lng]);
+      // estimate size at a coarser resolution (1 coarse cell ~ 343 res-10 cells)
+      const estimatedCells =
+        h3.polygonToCells(polygonCoords, HEX_RESOLUTION - 3).length * 343;
+      if (estimatedCells > MAX_SELECTION_CELLS) {
+        alert(
+          "This area is too large to select at once. Please select a smaller area."
+        );
+        e.layer.remove();
+        return;
+      }
       const hexagonIDs = h3.polygonToCells(polygonCoords, HEX_RESOLUTION);
       setMultiSelectHexagons(hexagonIDs);
       setIsAdd(e.layerType === "polygon");

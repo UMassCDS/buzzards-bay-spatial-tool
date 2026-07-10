@@ -163,7 +163,11 @@ const AnnotationsContextProvider = ({ children }) => {
       intervieweeId,
       selectedRegion,
     };
-    localStorage.setItem("annotationsState", JSON.stringify(state));
+    try {
+      localStorage.setItem("annotationsState", JSON.stringify(state));
+    } catch (error) {
+      console.warn("Failed to persist annotations to localStorage:", error);
+    }
   }, [priorAnnotations, currentIndex, intervieweeId, selectedRegion]);
 
   const clearStateFromStorage = () => {
