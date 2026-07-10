@@ -196,10 +196,7 @@ const AnnotationsContextProvider = ({ children }) => {
     if (isInitialized) {
       saveStateToStorage();
     }
-    // saveStateToStorage only persists priorAnnotations/currentIndex/
-    // intervieweeId/selectedRegion, so only re-save when those change (via the
-    // useCallback identity). Depending on currentHexes/currentNotes here would
-    // re-serialize everything to localStorage on every hex click and keystroke.
+    // saveStateToStorage identity changes only when persisted state changes
   }, [isInitialized, saveStateToStorage]);
 
   const resetInterview = () => {
