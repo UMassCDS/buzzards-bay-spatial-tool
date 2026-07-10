@@ -4,6 +4,7 @@ import {
   TileLayer,
   LayersControl,
   Polygon,
+  Polyline,
   FeatureGroup,
   useMapEvents,
   useMap,
@@ -25,6 +26,13 @@ import REGIONS from "../config/regions";
 window.type = true;
 
 const HEX_RESOLUTION = 10;
+
+// Individual hex outlines are only drawn at this zoom or closer. At zoom 15 a
+// res-10 hex is ~35px across, and only a few hundred fit in the viewport, so
+// drawing them is cheap. Below this zoom the merged outline is shown alone.
+const HEX_GRID_MIN_ZOOM = 15;
+// Safety cap so a pathological case can never draw unbounded geometry.
+const HEX_GRID_MAX_CELLS = 2000;
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -294,141 +302,113 @@ function EvenlySpacedNodesLayer() {
   );
 }
 
-function PriorAnnotationsLayerByType({ hexagons }) {
-  const [zoom, setZoom] = useState(11);
-  const [canvasLayer, setCanvasLayer] = useState(null);
-  const map = useMap();
-
-  useMapEvents({
-    zoomend: () => {
-      setZoom(map.getZoom());
-    },
-  });
-
-  // Use custom canvas layer for low zoom levels
-  useEffect(() => {
-    if (!map || zoom >= 10) {
-      if (canvasLayer) {
-        map.removeLayer(canvasLayer);
-        setCanvasLayer(null);
-      }
-      return;
-    }
-
-    // Remove old layer if exists
-    if (canvasLayer) {
-      map.removeLayer(canvasLayer);
-    }
-
-    // Create custom canvas layer for better performance
-    const CanvasLayer = L.Layer.extend({
-      onAdd: function (map) {
-        const canvas = L.DomUtil.create("canvas");
-        const size = map.getSize();
-        canvas.width = size.x;
-        canvas.height = size.y;
-        canvas.style.position = "absolute";
-
-        this._canvas = canvas;
-        this._ctx = canvas.getContext("2d");
-
-        map.getPanes().overlayPane.appendChild(canvas);
-        map.on("moveend", this._reset, this);
-        this._reset();
-      },
-
-      onRemove: function (map) {
-        if (this._canvas && this._canvas.parentNode) {
-          map.getPanes().overlayPane.removeChild(this._canvas);
-        }
-        map.off("moveend", this._reset, this);
-      },
-
-      _reset: function () {
-        const topLeft = this._map.containerPointToLayerPoint([0, 0]);
-        L.DomUtil.setPosition(this._canvas, topLeft);
-        this._draw();
-      },
-
-      _draw: function () {
-        const ctx = this._ctx;
-        const size = this._map.getSize();
-        ctx.clearRect(0, 0, size.x, size.y);
-
-        const sampleRate = zoom < 8 ? 10 : zoom < 9 ? 5 : 3;
-
-        for (let i = 0; i < hexagons.length; i += sampleRate) {
-          const hex = hexagons[i];
-          const center = hex.boundary
-            .reduce(
-              (acc, coord) => [acc[0] + coord[0], acc[1] + coord[1]],
-              [0, 0]
-            )
-            .map((v) => v / hex.boundary.length);
-
-          const point = this._map.latLngToContainerPoint(center);
-
-          ctx.fillStyle = hex.color;
-          ctx.globalAlpha = 0.5;
-          ctx.beginPath();
-          ctx.arc(point.x, point.y, zoom < 8 ? 2 : 3, 0, 2 * Math.PI);
-          ctx.fill();
-        }
-      },
-    });
-
-    const layer = new CanvasLayer();
-    map.addLayer(layer);
-    setCanvasLayer(layer);
-
-    return () => {
-      if (layer && map.hasLayer(layer)) {
-        map.removeLayer(layer);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zoom, hexagons, map]);
-
-  // Only render actual polygons at high zoom
-  if (zoom < 10) {
-    return null;
-  }
-
-  // At medium zoom, reduce detail
-  const simplifiedHexagons =
-    zoom < 12 ? hexagons.filter((_, index) => index % 2 === 0) : hexagons;
+// Filtering by type happens in here (rather than in the parent) so that the
+// hexagons array stays referentially stable across unrelated Map re-renders —
+// otherwise every click on the map would re-merge every annotation layer.
+function PriorAnnotationsLayerByType({ annotations, type }) {
+  const hexagons = useMemo(
+    () => annotations.filter((annotation) => annotation.type === type),
+    [annotations, type]
+  );
+  const color = hexagons[0]?.color;
+  const polygons = useMemo(() => mergedPolygonsFromHexes(hexagons), [hexagons]);
 
   return (
     <>
-      {simplifiedHexagons.map((hex) => (
+      {polygons.map((rings, index) => (
         <Polygon
-          key={hex.id}
+          key={index}
           weight={2.5}
           fillOpacity={0.2}
-          positions={hex.boundary}
+          positions={rings}
           pathOptions={{
-            color: hex.color,
-            fillColor: hex.color,
+            color,
+            fillColor: color,
             opacity: 0.6,
           }}
         />
       ))}
+      <HexGridLayer hexagons={hexagons} color={color} />
     </>
   );
 }
 
+// Draws the individual hex outlines inside a merged shape, so the grid is
+// visible when zoomed in close enough to interact with single hexes. Culled to
+// the viewport and rendered as one multi-polyline (a single Leaflet layer), so
+// the cost is bounded by what fits on screen, not by the selection size.
+function HexGridLayer({ hexagons, color }) {
+  const map = useMap();
+  const [view, setView] = useState(() => ({
+    zoom: map.getZoom(),
+    bounds: map.getBounds(),
+  }));
+
+  useMapEvents({
+    zoomend: () => setView({ zoom: map.getZoom(), bounds: map.getBounds() }),
+    moveend: () => setView({ zoom: map.getZoom(), bounds: map.getBounds() }),
+  });
+
+  const rings = useMemo(() => {
+    if (view.zoom < HEX_GRID_MIN_ZOOM || hexagons.length === 0) {
+      return [];
+    }
+    const bounds = view.bounds.pad(0.05);
+    const visible = [];
+    for (const hex of hexagons) {
+      if (visible.length >= HEX_GRID_MAX_CELLS) break;
+      if (bounds.contains(h3.cellToLatLng(hex.id))) {
+        const boundary = h3.cellToBoundary(hex.id, false);
+        boundary.push(boundary[0]); // close the ring
+        visible.push(boundary);
+      }
+    }
+    return visible;
+  }, [view, hexagons]);
+
+  if (rings.length === 0) {
+    return null;
+  }
+
+  return (
+    <Polyline
+      positions={rings}
+      pathOptions={{ color, weight: 1, opacity: 0.8, interactive: false }}
+    />
+  );
+}
+
+// Renders a set of hexes as a single merged outline instead of one Polygon per
+// hex. Large selections (thousands of hexes) collapse to a handful of shapes, so
+// the map stays responsive. The underlying hexes are unchanged.
+function mergedPolygonsFromHexes(hexagons) {
+  const ids = hexagons.map((hex) => hex.id);
+  if (ids.length === 0) return [];
+  try {
+    // false => coordinates returned as [lat, lng], which is what Leaflet expects.
+    return h3.cellsToMultiPolygon(ids, false);
+  } catch (error) {
+    console.error("Failed to merge hexes into polygons:", error);
+    return [];
+  }
+}
+
 function SelectionLayer({ hexagons }) {
+  const color = hexagons[0]?.color;
+  const polygons = useMemo(() => mergedPolygonsFromHexes(hexagons), [hexagons]);
+
   return (
     <>
-      {hexagons.map((hex) => (
+      {polygons.map((rings, index) => (
         <Polygon
-          key={hex.id}
+          key={index}
           weight={4}
           fillOpacity={0.4}
-          positions={hex.boundary}
-          pathOptions={{ color: hex.color, fillColor: hex.color }}
+          positions={rings}
+          pathOptions={{ color, fillColor: color }}
         />
       ))}
+      <HexGridLayer hexagons={hexagons} color={color} />
     </>
   );
 }
@@ -494,6 +474,8 @@ function Map() {
   const [isAdd, setIsAdd] = useState(false);
   const [mapMode, setMapMode] = useState("pan"); // "pan" or "select"
 
+  // Wrap hex IDs with their display color. Boundaries are no longer computed per
+  // hex here — the layers merge the hexes into a single outline at render time.
   const h3IDsToGeoBoundary = ({ hexagonsIDs, type }) => {
     if (!hexagonsIDs) {
       return [];
@@ -503,7 +485,6 @@ function Map() {
 
     return hexagonsIDs.map((hexID) => ({
       id: hexID,
-      boundary: h3.cellToBoundary(hexID, false).map(([lat, lng]) => [lat, lng]),
       color: color,
       type: type,
     }));
@@ -542,8 +523,15 @@ function Map() {
         : []
     );
     setPriorAnnotations(hexs);
+    // Depends on currentNotes.index (not the whole currentNotes object) so that
+    // typing notes doesn't rebuild — and re-merge — every annotation layer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context.priorAnnotations, context.annotationTypes, context.currentNotes]);
+  }, [
+    context.priorAnnotations,
+    context.annotationTypes,
+    context.viewingPriorAnnotation,
+    context.currentNotes.index,
+  ]);
 
   const onAddSelectionHexagon = (hexagonID) => {
     const idx = selectedHexagons.indexOf(hexagonID);
@@ -676,23 +664,20 @@ function Map() {
               <SelectionLayer hexagons={hexagonsBoundaries} />
             </FeatureGroup>
           </LayersControl.Overlay>
-          r
-          {Object.keys(context.annotationTypes).map((type) => {
-            const filteredHexagons = priorAnnotations.filter(
-              (annotation) => annotation.type === type
-            );
-            return (
-              <LayersControl.Overlay
-                key={type}
-                checked
-                name={`${type} - Annotations`}
-              >
-                <FeatureGroup>
-                  <PriorAnnotationsLayerByType hexagons={filteredHexagons} />
-                </FeatureGroup>
-              </LayersControl.Overlay>
-            );
-          })}
+          {Object.keys(context.annotationTypes).map((type) => (
+            <LayersControl.Overlay
+              key={type}
+              checked
+              name={`${type} - Annotations`}
+            >
+              <FeatureGroup>
+                <PriorAnnotationsLayerByType
+                  annotations={priorAnnotations}
+                  type={type}
+                />
+              </FeatureGroup>
+            </LayersControl.Overlay>
+          ))}
           <EvenlySpacedNodesLayer />
         </LayersControl>
         <FeatureGroup>
