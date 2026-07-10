@@ -37,7 +37,7 @@ const HEX_GRID_MAX_CELLS = 2000;
 // Max hexes added since the last full merge before re-merging the selection
 const SELECTION_REMERGE_THRESHOLD = 300;
 // Reject drawn selections above this many hexes (the UI freezes for minutes)
-const MAX_SELECTION_CELLS = 100000;
+const MAX_SELECTION_CELLS = 300000;
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -384,11 +384,26 @@ function HexGridLayer({ hexIds, color }) {
   );
 }
 
-// Merges hexes into a few outline polygons instead of one Polygon per hex
+// cellsToMultiPolygon is superlinear, so for large sets we merge coarser parent
+// cells (data stays res 10; only the display outline is approximated)
+function displayMergeResolution(count) {
+  if (count > 120000) return 7;
+  if (count > 30000) return 8;
+  if (count > 6000) return 9;
+  return HEX_RESOLUTION;
+}
+
 function mergedPolygonsFromHexes(hexIds) {
   if (hexIds.length === 0) return [];
   try {
-    return h3.cellsToMultiPolygon(hexIds, false);
+    const res = displayMergeResolution(hexIds.length);
+    let ids = hexIds;
+    if (res < HEX_RESOLUTION) {
+      const parents = new Set();
+      for (const id of hexIds) parents.add(h3.cellToParent(id, res));
+      ids = [...parents];
+    }
+    return h3.cellsToMultiPolygon(ids, false);
   } catch (error) {
     console.error("Failed to merge hexes into polygons:", error);
     return [];
@@ -497,52 +512,9 @@ const RegionController = () => {
   return null;
 };
 
-const ResetViewButton = () => {
-  const context = useContext(AnnotationsContext);
-  const map = useMap();
-
-  const resetView = () => {
-    const regionConfig = REGIONS[context.selectedRegion];
-    if (regionConfig) {
-      map.setView(regionConfig.center, regionConfig.zoom);
-    }
-  };
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: "90px",
-        left: "10px",
-        zIndex: 99,
-        backgroundColor: "white",
-        borderRadius: "4px",
-        border: "2px solid rgba(128, 128, 128, 0.5)",
-        width: "33px",
-      }}
-    >
-      <ActionIcon
-        variant="light"
-        color="gray"
-        size="lg"
-        onClick={resetView}
-        title="Reset map view"
-        style={{
-          borderRadius: "2px",
-          width: "100%",
-          height: "29px",
-          minWidth: "29px",
-          minHeight: "29px",
-        }}
-      >
-        <IconFocusCentered size={16} />
-      </ActionIcon>
-    </div>
-  );
-};
-
 function Map() {
   const context = useContext(AnnotationsContext);
+  const [mapInstance, setMapInstance] = useState(null);
   const [selectedHexagons, setSelectedHexagons] = useState([]);
 
   const [priorAnnotations, setPriorAnnotations] = useState([]);
@@ -704,7 +676,44 @@ function Map() {
         </ActionIcon>
       </div>
 
+      {/* Reset view (temporary, for testing) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "25px",
+          left: "10px",
+          zIndex: 99,
+          backgroundColor: "white",
+          borderRadius: "4px",
+          border: "2px solid rgba(128, 128, 128, 0.5)",
+          width: "33px",
+        }}
+      >
+        <ActionIcon
+          variant="light"
+          color="gray"
+          size="lg"
+          onClick={() => {
+            const regionConfig = REGIONS[context.selectedRegion];
+            if (mapInstance && regionConfig) {
+              mapInstance.setView(regionConfig.center, regionConfig.zoom);
+            }
+          }}
+          title="Reset map view"
+          style={{
+            borderRadius: "2px",
+            width: "100%",
+            height: "29px",
+            minWidth: "29px",
+            minHeight: "29px",
+          }}
+        >
+          <IconFocusCentered size={16} />
+        </ActionIcon>
+      </div>
+
       <MapContainer
+        ref={setMapInstance}
         center={[41.7454, -70.6181]}
         zoom={11}
         style={{ height: "80vh", width: "100%", zIndex: 0 }}
@@ -713,7 +722,6 @@ function Map() {
       >
         <MapController mapMode={mapMode} />
         <RegionController />
-        <ResetViewButton />
         <BuildLegend />
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="OpenStreetMap">
