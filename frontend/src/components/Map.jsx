@@ -36,8 +36,8 @@ const HEX_GRID_MIN_ZOOM = 15;
 const HEX_GRID_MAX_CELLS = 2000;
 // Max hexes added since the last full merge before re-merging the selection
 const SELECTION_REMERGE_THRESHOLD = 300;
-// Reject drawn selections above this many hexes (the UI freezes for minutes)
-const MAX_SELECTION_CELLS = 300000;
+// Reject drawn selections above this many hexes (merge time grows past a few sec)
+const MAX_SELECTION_CELLS = 200000;
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -384,26 +384,11 @@ function HexGridLayer({ hexIds, color }) {
   );
 }
 
-// cellsToMultiPolygon is superlinear, so for large sets we merge coarser parent
-// cells (data stays res 10; only the display outline is approximated)
-function displayMergeResolution(count) {
-  if (count > 120000) return 7;
-  if (count > 30000) return 8;
-  if (count > 6000) return 9;
-  return HEX_RESOLUTION;
-}
-
+// Exact merged outline of the hexes (no coarsening — must match the real cells)
 function mergedPolygonsFromHexes(hexIds) {
   if (hexIds.length === 0) return [];
   try {
-    const res = displayMergeResolution(hexIds.length);
-    let ids = hexIds;
-    if (res < HEX_RESOLUTION) {
-      const parents = new Set();
-      for (const id of hexIds) parents.add(h3.cellToParent(id, res));
-      ids = [...parents];
-    }
-    return h3.cellsToMultiPolygon(ids, false);
+    return h3.cellsToMultiPolygon(hexIds, false);
   } catch (error) {
     console.error("Failed to merge hexes into polygons:", error);
     return [];
