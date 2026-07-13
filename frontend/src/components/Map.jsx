@@ -4,6 +4,7 @@ import {
   TileLayer,
   LayersControl,
   Polygon,
+  Polyline,
   FeatureGroup,
   useMapEvents,
   useMap,
@@ -15,9 +16,13 @@ import "../styles/Map.css";
 import L from "leaflet";
 import "@gnatih/leaflet.legend";
 import * as h3 from "h3-js";
-import { useEffect, useState, useContext, useMemo } from "react";
+import { useEffect, useState, useContext, useMemo, useRef } from "react";
 import { ActionIcon } from "@mantine/core";
-import { IconArrowsMove, IconHandFinger } from "@tabler/icons-react";
+import {
+  IconArrowsMove,
+  IconHandFinger,
+  IconFocusCentered,
+} from "@tabler/icons-react";
 
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import REGIONS from "../config/regions";
@@ -25,6 +30,14 @@ import REGIONS from "../config/regions";
 window.type = true;
 
 const HEX_RESOLUTION = 10;
+
+// Individual hex outlines only render at this zoom or closer
+const HEX_GRID_MIN_ZOOM = 15;
+const HEX_GRID_MAX_CELLS = 2000;
+// Max hexes added since the last full merge before re-merging the selection
+const SELECTION_REMERGE_THRESHOLD = 300;
+// Reject drawn selections above this many hexes (merge time grows past a few sec)
+const MAX_SELECTION_CELLS = 200000;
 
 L.drawLocal.draw.toolbar.buttons.rectangle = "REMOVE annotation hexagons";
 L.drawLocal.draw.handlers.rectangle.tooltip.start =
@@ -40,15 +53,20 @@ L.drawLocal.draw.handlers.polygon.tooltip.end =
 function BuildLegend() {
   const context = useContext(AnnotationsContext);
 
-  const hexTypeSymbols = Object.keys(context.annotationTypes).map((type) => ({
-    label: type,
-    type: "polygon",
-    sides: 6,
-    color: context.annotationTypes[type],
-    fillColor: context.annotationTypes[type],
-    fillOpacity: 0.2,
-    weight: 2,
-  }));
+  // Memoized so the legend isn't rebuilt on every map re-render
+  const hexTypeSymbols = useMemo(
+    () =>
+      Object.keys(context.annotationTypes).map((type) => ({
+        label: type,
+        type: "polygon",
+        sides: 6,
+        color: context.annotationTypes[type],
+        fillColor: context.annotationTypes[type],
+        fillOpacity: 0.2,
+        weight: 2,
+      })),
+    [context.annotationTypes]
+  );
 
   const sensorSymbols = useMemo(() => {
     if (context.sensorDataVisible) {
@@ -294,141 +312,137 @@ function EvenlySpacedNodesLayer() {
   );
 }
 
-function PriorAnnotationsLayerByType({ hexagons }) {
-  const [zoom, setZoom] = useState(11);
-  const [canvasLayer, setCanvasLayer] = useState(null);
-  const map = useMap();
-
-  useMapEvents({
-    zoomend: () => {
-      setZoom(map.getZoom());
-    },
-  });
-
-  // Use custom canvas layer for low zoom levels
-  useEffect(() => {
-    if (!map || zoom >= 10) {
-      if (canvasLayer) {
-        map.removeLayer(canvasLayer);
-        setCanvasLayer(null);
-      }
-      return;
-    }
-
-    // Remove old layer if exists
-    if (canvasLayer) {
-      map.removeLayer(canvasLayer);
-    }
-
-    // Create custom canvas layer for better performance
-    const CanvasLayer = L.Layer.extend({
-      onAdd: function (map) {
-        const canvas = L.DomUtil.create("canvas");
-        const size = map.getSize();
-        canvas.width = size.x;
-        canvas.height = size.y;
-        canvas.style.position = "absolute";
-
-        this._canvas = canvas;
-        this._ctx = canvas.getContext("2d");
-
-        map.getPanes().overlayPane.appendChild(canvas);
-        map.on("moveend", this._reset, this);
-        this._reset();
-      },
-
-      onRemove: function (map) {
-        if (this._canvas && this._canvas.parentNode) {
-          map.getPanes().overlayPane.removeChild(this._canvas);
-        }
-        map.off("moveend", this._reset, this);
-      },
-
-      _reset: function () {
-        const topLeft = this._map.containerPointToLayerPoint([0, 0]);
-        L.DomUtil.setPosition(this._canvas, topLeft);
-        this._draw();
-      },
-
-      _draw: function () {
-        const ctx = this._ctx;
-        const size = this._map.getSize();
-        ctx.clearRect(0, 0, size.x, size.y);
-
-        const sampleRate = zoom < 8 ? 10 : zoom < 9 ? 5 : 3;
-
-        for (let i = 0; i < hexagons.length; i += sampleRate) {
-          const hex = hexagons[i];
-          const center = hex.boundary
-            .reduce(
-              (acc, coord) => [acc[0] + coord[0], acc[1] + coord[1]],
-              [0, 0]
-            )
-            .map((v) => v / hex.boundary.length);
-
-          const point = this._map.latLngToContainerPoint(center);
-
-          ctx.fillStyle = hex.color;
-          ctx.globalAlpha = 0.5;
-          ctx.beginPath();
-          ctx.arc(point.x, point.y, zoom < 8 ? 2 : 3, 0, 2 * Math.PI);
-          ctx.fill();
-        }
-      },
-    });
-
-    const layer = new CanvasLayer();
-    map.addLayer(layer);
-    setCanvasLayer(layer);
-
-    return () => {
-      if (layer && map.hasLayer(layer)) {
-        map.removeLayer(layer);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zoom, hexagons, map]);
-
-  // Only render actual polygons at high zoom
-  if (zoom < 10) {
-    return null;
-  }
-
-  // At medium zoom, reduce detail
-  const simplifiedHexagons =
-    zoom < 12 ? hexagons.filter((_, index) => index % 2 === 0) : hexagons;
+// Filters by type in here so map clicks don't re-merge every annotation layer
+function PriorAnnotationsLayerByType({ annotations, type }) {
+  const hexagons = useMemo(
+    () => annotations.filter((annotation) => annotation.type === type),
+    [annotations, type]
+  );
+  const color = hexagons[0]?.color;
+  const hexIds = useMemo(() => hexagons.map((hex) => hex.id), [hexagons]);
+  const polygons = useMemo(() => mergedPolygonsFromHexes(hexIds), [hexIds]);
 
   return (
     <>
-      {simplifiedHexagons.map((hex) => (
+      {polygons.map((rings, index) => (
         <Polygon
-          key={hex.id}
+          key={index}
           weight={2.5}
           fillOpacity={0.2}
-          positions={hex.boundary}
+          positions={rings}
           pathOptions={{
-            color: hex.color,
-            fillColor: hex.color,
+            color,
+            fillColor: color,
             opacity: 0.6,
           }}
         />
       ))}
+      <HexGridLayer hexIds={hexIds} color={color} />
     </>
   );
 }
 
-function SelectionLayer({ hexagons }) {
+// Per-hex outlines at high zoom, culled to the viewport, drawn as one polyline
+function HexGridLayer({ hexIds, color }) {
+  const map = useMap();
+  const [view, setView] = useState(() => ({
+    zoom: map.getZoom(),
+    bounds: map.getBounds(),
+  }));
+
+  useMapEvents({
+    zoomend: () => setView({ zoom: map.getZoom(), bounds: map.getBounds() }),
+    moveend: () => setView({ zoom: map.getZoom(), bounds: map.getBounds() }),
+  });
+
+  const rings = useMemo(() => {
+    if (view.zoom < HEX_GRID_MIN_ZOOM || hexIds.length === 0) {
+      return [];
+    }
+    const bounds = view.bounds.pad(0.05);
+    const visible = [];
+    for (const id of hexIds) {
+      if (visible.length >= HEX_GRID_MAX_CELLS) break;
+      if (bounds.contains(h3.cellToLatLng(id))) {
+        const boundary = h3.cellToBoundary(id, false);
+        boundary.push(boundary[0]); // close the ring
+        visible.push(boundary);
+      }
+    }
+    return visible;
+  }, [view, hexIds]);
+
+  if (rings.length === 0) {
+    return null;
+  }
+
+  return (
+    <Polyline
+      positions={rings}
+      pathOptions={{ color, weight: 1, opacity: 0.8, interactive: false }}
+    />
+  );
+}
+
+// Exact merged outline of the hexes (no coarsening — must match the real cells)
+function mergedPolygonsFromHexes(hexIds) {
+  if (hexIds.length === 0) return [];
+  try {
+    return h3.cellsToMultiPolygon(hexIds, false);
+  } catch (error) {
+    console.error("Failed to merge hexes into polygons:", error);
+    return [];
+  }
+}
+
+// Keeps the last full merge as a base and merges only newly added hexes, so
+// clicks don't re-merge the whole selection (slow for large areas)
+function SelectionLayer({ hexIds, color }) {
+  const baseRef = useRef({ idSet: new Set(), polygons: [] });
+
+  const { basePolygons, addedPolygons } = useMemo(() => {
+    const base = baseRef.current;
+
+    let added = null;
+    if (hexIds.length >= base.idSet.size) {
+      added = [];
+      for (const id of hexIds) {
+        if (!base.idSet.has(id)) {
+          added.push(id);
+        }
+      }
+      const hasRemovals = hexIds.length - added.length < base.idSet.size;
+      if (hasRemovals || added.length > SELECTION_REMERGE_THRESHOLD) {
+        added = null;
+      }
+    }
+
+    if (added === null) {
+      baseRef.current = {
+        idSet: new Set(hexIds),
+        polygons: mergedPolygonsFromHexes(hexIds),
+      };
+      return { basePolygons: baseRef.current.polygons, addedPolygons: [] };
+    }
+
+    return {
+      basePolygons: base.polygons,
+      addedPolygons: mergedPolygonsFromHexes(added),
+    };
+  }, [hexIds]);
+
   return (
     <>
-      {hexagons.map((hex) => (
+      {[...basePolygons, ...addedPolygons].map((rings, index) => (
         <Polygon
-          key={hex.id}
+          key={index}
           weight={4}
           fillOpacity={0.4}
-          positions={hex.boundary}
-          pathOptions={{ color: hex.color, fillColor: hex.color }}
+          positions={rings}
+          pathOptions={{ color, fillColor: color }}
         />
       ))}
+      <HexGridLayer hexIds={hexIds} color={color} />
     </>
   );
 }
@@ -485,8 +499,8 @@ const RegionController = () => {
 
 function Map() {
   const context = useContext(AnnotationsContext);
+  const [mapInstance, setMapInstance] = useState(null);
   const [selectedHexagons, setSelectedHexagons] = useState([]);
-  const [hexagonsBoundaries, setHexagonsBoundaries] = useState([]);
 
   const [priorAnnotations, setPriorAnnotations] = useState([]);
 
@@ -503,7 +517,6 @@ function Map() {
 
     return hexagonsIDs.map((hexID) => ({
       id: hexID,
-      boundary: h3.cellToBoundary(hexID, false).map(([lat, lng]) => [lat, lng]),
       color: color,
       type: type,
     }));
@@ -513,15 +526,6 @@ function Map() {
     const currentHexIds = context.currentHexes;
     setSelectedHexagons(currentHexIds);
   }, [context.currentHexes]);
-
-  useEffect(() => {
-    const newHexagonsBoundaries = h3IDsToGeoBoundary({
-      hexagonsIDs: selectedHexagons,
-      type: context.currentNotes.type,
-    });
-    setHexagonsBoundaries(newHexagonsBoundaries);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedHexagons, context.currentNotes.type, context.annotationTypes]);
 
   useEffect(() => {
     let priorsWithoutCurrent;
@@ -542,8 +546,14 @@ function Map() {
         : []
     );
     setPriorAnnotations(hexs);
+    // currentNotes.index (not currentNotes) so typing doesn't rebuild layers
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context.priorAnnotations, context.annotationTypes, context.currentNotes]);
+  }, [
+    context.priorAnnotations,
+    context.annotationTypes,
+    context.viewingPriorAnnotation,
+    context.currentNotes.index,
+  ]);
 
   const onAddSelectionHexagon = (hexagonID) => {
     const idx = selectedHexagons.indexOf(hexagonID);
@@ -579,6 +589,16 @@ function Map() {
       const polygonCoords = layer
         .getLatLngs()[0]
         .map((latlng) => [latlng.lat, latlng.lng]);
+      // estimate size at a coarser resolution (1 coarse cell ~ 343 res-10 cells)
+      const estimatedCells =
+        h3.polygonToCells(polygonCoords, HEX_RESOLUTION - 3).length * 343;
+      if (estimatedCells > MAX_SELECTION_CELLS) {
+        alert(
+          "This area is too large to select at once. Please select a smaller area."
+        );
+        e.layer.remove();
+        return;
+      }
       const hexagonIDs = h3.polygonToCells(polygonCoords, HEX_RESOLUTION);
       setMultiSelectHexagons(hexagonIDs);
       setIsAdd(e.layerType === "polygon");
@@ -641,12 +661,48 @@ function Map() {
         </ActionIcon>
       </div>
 
+      {/* Reset view (temporary, for testing) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "25px",
+          left: "10px",
+          zIndex: 99,
+          backgroundColor: "white",
+          borderRadius: "4px",
+          border: "2px solid rgba(128, 128, 128, 0.5)",
+          width: "33px",
+        }}
+      >
+        <ActionIcon
+          variant="light"
+          color="gray"
+          size="lg"
+          onClick={() => {
+            const regionConfig = REGIONS[context.selectedRegion];
+            if (mapInstance && regionConfig) {
+              mapInstance.setView(regionConfig.center, regionConfig.zoom);
+            }
+          }}
+          title="Reset map view"
+          style={{
+            borderRadius: "2px",
+            width: "100%",
+            height: "29px",
+            minWidth: "29px",
+            minHeight: "29px",
+          }}
+        >
+          <IconFocusCentered size={16} />
+        </ActionIcon>
+      </div>
+
       <MapContainer
+        ref={setMapInstance}
         center={[41.7454, -70.6181]}
         zoom={11}
         style={{ height: "80vh", width: "100%", zIndex: 0 }}
-        // Render vector layers (hexagons) on a single canvas instead of one SVG
-        // node each, so large selections with thousands of hexes stay responsive.
+        // Canvas rendering keeps large hex selections responsive
         preferCanvas={true}
       >
         <MapController mapMode={mapMode} />
@@ -673,26 +729,26 @@ function Map() {
           </LayersControl.BaseLayer>
           <LayersControl.Overlay checked name="Current Annotation">
             <FeatureGroup>
-              <SelectionLayer hexagons={hexagonsBoundaries} />
+              <SelectionLayer
+                hexIds={selectedHexagons || []}
+                color={context.annotationTypes[context.currentNotes.type]}
+              />
             </FeatureGroup>
           </LayersControl.Overlay>
-          r
-          {Object.keys(context.annotationTypes).map((type) => {
-            const filteredHexagons = priorAnnotations.filter(
-              (annotation) => annotation.type === type
-            );
-            return (
-              <LayersControl.Overlay
-                key={type}
-                checked
-                name={`${type} - Annotations`}
-              >
-                <FeatureGroup>
-                  <PriorAnnotationsLayerByType hexagons={filteredHexagons} />
-                </FeatureGroup>
-              </LayersControl.Overlay>
-            );
-          })}
+          {Object.keys(context.annotationTypes).map((type) => (
+            <LayersControl.Overlay
+              key={type}
+              checked
+              name={`${type} - Annotations`}
+            >
+              <FeatureGroup>
+                <PriorAnnotationsLayerByType
+                  annotations={priorAnnotations}
+                  type={type}
+                />
+              </FeatureGroup>
+            </LayersControl.Overlay>
+          ))}
           <EvenlySpacedNodesLayer />
         </LayersControl>
         <FeatureGroup>
