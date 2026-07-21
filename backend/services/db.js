@@ -10,6 +10,7 @@ const config = {
   options: {
     encrypt: true,
     enableArithAbort: true,
+    trustServerCertificate: process.env.DB_TRUST_CERT === "true",
   },
   requestTimeout: 30000,
 };
