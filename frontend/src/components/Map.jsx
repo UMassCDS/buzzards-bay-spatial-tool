@@ -26,10 +26,9 @@ import {
 
 import { AnnotationsContext } from "../context/AnnotationsContext";
 import REGIONS from "../config/regions";
+import { HEX_RESOLUTION } from "../config/hexResolution";
 
 window.type = true;
-
-const HEX_RESOLUTION = 10;
 
 // Individual hex outlines only render at this zoom or closer
 const HEX_GRID_MIN_ZOOM = 15;

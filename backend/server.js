@@ -11,7 +11,7 @@ dotenv.config();
 
 // Resolution used by the frontend to generate annotation hexes. Kept in sync so
 // we can un-compact hexes back to their full-resolution set before storing them.
-const HEX_RESOLUTION = 10;
+const HEX_RESOLUTION = 9;
 
 const app = express();
 app.use(cors());
