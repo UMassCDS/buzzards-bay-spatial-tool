@@ -29,7 +29,7 @@ import REGIONS from "../config/regions";
 
 window.type = true;
 
-const HEX_RESOLUTION = 10;
+const HEX_RESOLUTION = 9;
 
 // Individual hex outlines only render at this zoom or closer
 const HEX_GRID_MIN_ZOOM = 15;
