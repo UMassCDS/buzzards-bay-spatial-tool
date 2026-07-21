@@ -2,8 +2,34 @@ import { createContext, useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import * as h3 from "h3-js";
 import TYPES from "./AnnotationTypes";
+import { HEX_RESOLUTION } from "../config/hexResolution";
 
 const AnnotationsContext = createContext();
+
+function migrateAnnotationHexes(annotations) {
+  if (!Array.isArray(annotations)) return [];
+
+  return annotations.map((annotation) => {
+    const hexes = annotation?.annotationHexes;
+    if (!Array.isArray(hexes) || hexes.length === 0) return annotation;
+
+    try {
+      const migrated = [
+        ...new Set(
+          hexes.map((id) =>
+            h3.getResolution(id) > HEX_RESOLUTION
+              ? h3.cellToParent(id, HEX_RESOLUTION)
+              : id
+          )
+        ),
+      ];
+      return { ...annotation, annotationHexes: migrated };
+    } catch (error) {
+      console.warn("Failed to migrate cached hexes:", error);
+      return annotation;
+    }
+  });
+}
 
 const AnnotationsContextProvider = ({ children }) => {
   const [annotationTypes, setAnnotationTypes] = useState(TYPES);
@@ -185,7 +211,7 @@ const AnnotationsContextProvider = ({ children }) => {
           selectedRegion,
         } = JSON.parse(savedState);
 
-        setPriorAnnotations(priorAnnotations || []);
+        setPriorAnnotations(migrateAnnotationHexes(priorAnnotations));
         setCurrentIndex(currentIndex || 0);
         setIntervieweeId(intervieweeId || "");
         setSelectedRegion(selectedRegion || "newengland");
